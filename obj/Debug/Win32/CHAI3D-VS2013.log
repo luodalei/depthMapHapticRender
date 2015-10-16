@@ -1,0 +1,407 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(364,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  dev2gif.c
+  dgif_lib.c
+  egif_lib.c
+  getarg.c
+external\giflib\src\dev2gif.c(18): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+  gifalloc.c
+external\giflib\src\dgif_lib.c(13): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+external\giflib\src\egif_lib.c(14): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+  gif_err.c
+external\giflib\src\getarg.c(99): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+  gif_font.c
+  gif_hash.c
+external\giflib\src\gifalloc.c(13): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+external\giflib\src\gif_err.c(12): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+external\giflib\src\gif_font.c(13): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+  qprintf.c
+external\giflib\src\gif_hash.c(19): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+  quantize.c
+  glew.c
+  lib3ds_atmosphere.c
+external\glew\src\glew.c(32): fatal error C1083: Cannot open include file: 'GL/glew.h': No such file or directory
+  lib3ds_background.c
+external\giflib\src\quantize.c(15): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+external\giflib\src\qprintf.c(13): fatal error C1083: Cannot open include file: 'gif_config.h': No such file or directory
+  lib3ds_camera.c
+  lib3ds_chunk.c
+external\lib3ds\src\lib3ds_background.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+external\lib3ds\src\lib3ds_atmosphere.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_chunktable.c
+  lib3ds_file.c
+external\lib3ds\src\lib3ds_chunk.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_io.c
+external\lib3ds\src\lib3ds_camera.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_light.c
+external\lib3ds\src\lib3ds_chunktable.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_material.c
+external\lib3ds\src\lib3ds_file.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_math.c
+external\lib3ds\src\lib3ds_light.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+external\lib3ds\src\lib3ds_io.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_matrix.c
+  lib3ds_mesh.c
+external\lib3ds\src\lib3ds_material.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+external\lib3ds\src\lib3ds_math.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_node.c
+  lib3ds_quat.c
+external\lib3ds\src\lib3ds_matrix.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_shadow.c
+external\lib3ds\src\lib3ds_node.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+external\lib3ds\src\lib3ds_mesh.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_track.c
+  lib3ds_util.c
+external\lib3ds\src\lib3ds_quat.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_vector.c
+external\lib3ds\src\lib3ds_shadow.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  lib3ds_viewport.c
+external\lib3ds\src\lib3ds_track.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+external\lib3ds\src\lib3ds_util.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  jaricom.c
+  jcapimin.c
+external\lib3ds\src\lib3ds_vector.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  jcapistd.c
+external\lib3ds\src\lib3ds_viewport.c(18): fatal error C1083: Cannot open include file: 'lib3ds_impl.h': No such file or directory
+  jcarith.c
+external\libjpeg\src\jaricom.c(17): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jcapimin.c(21): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jccoefct.c
+  jccolor.c
+external\libjpeg\src\jcapistd.c(18): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcdctmgr.c
+external\libjpeg\src\jcarith.c(17): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jchuff.c
+external\libjpeg\src\jccoefct.c(14): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcinit.c
+external\libjpeg\src\jccolor.c(12): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcmainct.c
+external\libjpeg\src\jcdctmgr.c(15): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcmarker.c
+external\libjpeg\src\jchuff.c(24): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcmaster.c
+external\libjpeg\src\jcinit.c(19): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jcmainct.c(14): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcomapi.c
+  jcparam.c
+external\libjpeg\src\jcmarker.c(13): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcprepct.c
+external\libjpeg\src\jcmaster.c(16): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jcsample.c
+external\libjpeg\src\jcomapi.c(13): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jctrans.c
+external\libjpeg\src\jcparam.c(15): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdapimin.c
+external\libjpeg\src\jcsample.c(49): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdapistd.c
+external\libjpeg\src\jctrans.c(15): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jcprepct.c(18): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdarith.c
+external\libjpeg\src\jdapimin.c(21): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdatadst.c
+  jdatasrc.c
+external\libjpeg\src\jdarith.c(17): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jdapistd.c(18): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdcoefct.c
+  jdcolor.c
+external\libjpeg\src\jdatasrc.c(19): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jdatadst.c(19): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jddctmgr.c
+  jdhuff.c
+external\libjpeg\src\jdcoefct.c(18): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jdcolor.c(12): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jddctmgr.c(20): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdinput.c
+  jdmainct.c
+external\libjpeg\src\jdhuff.c(20): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdmarker.c
+  jdmaster.c
+external\libjpeg\src\jdinput.c(16): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jdmainct.c(17): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jdmarker.c(17): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdmerge.c
+  jdpostct.c
+external\libjpeg\src\jdmaster.c(16): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jdsample.c
+  jdtrans.c
+external\libjpeg\src\jdpostct.c(20): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jerror.c
+external\libjpeg\src\jdmerge.c(36): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jdsample.c(23): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jfdctflt.c
+external\libjpeg\src\jdtrans.c(15): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jfdctfst.c
+  jfdctint.c
+external\libjpeg\src\jerror.c(22): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jfdctfst.c(35): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jidctflt.c
+external\libjpeg\src\jfdctflt.c(39): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jidctfst.c
+  jidctint.c
+external\libjpeg\src\jfdctint.c(45): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jmemansi.c
+external\libjpeg\src\jidctfst.c(36): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jidctflt.c(41): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jidctint.c(52): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jmemmgr.c
+  jmemnobs.c
+  jquant1.c
+external\libjpeg\src\jmemansi.c(16): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jquant2.c
+external\libjpeg\src\jquant1.c(14): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libjpeg\src\jmemnobs.c(19): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  jutils.c
+  adler32.c
+external\libjpeg\src\jmemmgr.c(29): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  compress.c
+external\libjpeg\src\jquant2.c(21): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+  crc32.c
+external\libjpeg\src\jutils.c(16): fatal error C1083: Cannot open include file: 'jinclude.h': No such file or directory
+external\libpng\src\adler32.c(8): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+  deflate.c
+  gzclose.c
+external\libpng\src\compress.c(9): fatal error C1083: Cannot open include file: 'zlib.h': No such file or directory
+  gzlib.c
+external\libpng\src\deflate.c(52): fatal error C1083: Cannot open include file: 'deflate.h': No such file or directory
+external\libpng\src\gzclose.c(6): fatal error C1083: Cannot open include file: 'gzguts.h': No such file or directory
+external\libpng\src\crc32.c(29): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+  gzread.c
+  gzwrite.c
+  infback.c
+external\libpng\src\gzlib.c(6): fatal error C1083: Cannot open include file: 'gzguts.h': No such file or directory
+  inffast.c
+external\libpng\src\gzread.c(6): fatal error C1083: Cannot open include file: 'gzguts.h': No such file or directory
+  inflate.c
+external\libpng\src\gzwrite.c(6): fatal error C1083: Cannot open include file: 'gzguts.h': No such file or directory
+  inftrees.c
+external\libpng\src\inffast.c(6): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+external\libpng\src\infback.c(13): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+  png.c
+  pngerror.c
+external\libpng\src\inflate.c(83): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+external\libpng\src\inftrees.c(6): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+  pngget.c
+  pngmem.c
+external\libpng\src\pngerror.c(19): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngpread.c
+external\libpng\src\png.c(14): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngread.c
+external\libpng\src\pngget.c(15): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngrio.c
+external\libpng\src\pngmem.c(20): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngrtran.c
+external\libpng\src\pngpread.c(14): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngrutil.c
+external\libpng\src\pngread.c(17): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+external\libpng\src\pngrio.c(21): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngset.c
+  pngtest.c
+external\libpng\src\pngrtran.c(19): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngtrans.c
+external\libpng\src\pngrutil.c(17): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngwio.c
+external\libpng\src\pngset.c(19): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngwrite.c
+external\libpng\src\pngtrans.c(14): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  pngwtran.c
+external\libpng\src\pngtest.c(36): fatal error C1083: Cannot open include file: 'zlib.h': No such file or directory
+  pngwutil.c
+external\libpng\src\pngwrite.c(14): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  trees.c
+external\libpng\src\pngwio.c(21): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  uncompr.c
+external\libpng\src\pngwtran.c(14): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  zutil.c
+external\libpng\src\pngwutil.c(14): fatal error C1083: Cannot open include file: 'pngpriv.h': No such file or directory
+  ALc.c
+external\libpng\src\trees.c(37): fatal error C1083: Cannot open include file: 'deflate.h': No such file or directory
+  alcConfig.c
+external\libpng\src\uncompr.c(9): fatal error C1083: Cannot open include file: 'zlib.h': No such file or directory
+  alcDedicated.c
+external\libpng\src\zutil.c(8): fatal error C1083: Cannot open include file: 'zutil.h': No such file or directory
+external\openal\Alc\ALc.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alcEcho.c
+  alcModulator.c
+external\openal\Alc\alcConfig.c(29): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alcReverb.c
+external\openal\Alc\alcDedicated.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alcRing.c
+external\openal\Alc\alcModulator.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+external\openal\Alc\alcEcho.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alcThread.c
+  ALu.c
+external\openal\Alc\alcReverb.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  dsound.c
+external\openal\Alc\alcRing.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  loopback.c
+external\openal\Alc\alcThread.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  mmdevapi.c
+external\openal\Alc\backends\dsound.c(25): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  null.c
+external\openal\Alc\ALu.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+external\openal\Alc\backends\loopback.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  wave.c
+  winmm.c
+external\openal\Alc\backends\mmdevapi.c(25): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  bs2b.c
+external\openal\Alc\backends\null.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  helpers.c
+external\openal\Alc\backends\winmm.c(25): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+external\openal\Alc\backends\wave.c(22): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  hrtf.c
+  mixer.c
+external\openal\Alc\bs2b.c(24): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  mixer_c.c
+external\openal\Alc\helpers.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  mixer_sse.c
+external\openal\Alc\mixer.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+external\openal\Alc\hrtf.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  panning.c
+  alAuxEffectSlot.c
+external\openal\Alc\mixer_c.c(1): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alBuffer.c
+external\openal\Alc\mixer_sse.c(1): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alEffect.c
+external\openal\Alc\panning.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alError.c
+external\openal\OpenAL32\alAuxEffectSlot.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alExtension.c
+external\openal\OpenAL32\alBuffer.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alFilter.c
+external\openal\OpenAL32\alEffect.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alListener.c
+external\openal\OpenAL32\alError.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alSource.c
+external\openal\OpenAL32\alExtension.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alState.c
+external\openal\OpenAL32\alFilter.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  alThunk.c
+external\openal\OpenAL32\alListener.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  bitwise.c
+external\openal\OpenAL32\alSource.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  framing.c
+external\openal\OpenAL32\alState.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+external\openal\OpenAL32\alThunk.c(21): fatal error C1083: Cannot open include file: 'alConfig.h': No such file or directory
+  analyze.c
+  apiwrapper.c
+external\theoraplayer\external\ogg\src\bitwise.c(24): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  bitpack.c
+external\theoraplayer\external\ogg\src\framing.c(25): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\analyze.c)
+  collect.c
+  decapiwrapper.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\apiwrapper.h(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory (external\theoraplayer\external\theora\lib\apiwrapper.c)
+  decinfo.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\bitpack.c)
+  decode.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\apiwrapper.h(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory (external\theoraplayer\external\theora\lib\decapiwrapper.c)
+  dequant.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\collect.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\decint.h(21): fatal error C1083: Cannot open include file: 'theora/theoradec.h': No such file or directory (external\theoraplayer\external\theora\lib\decinfo.c)
+  encapiwrapper.c
+external\theoraplayer\external\theora\lib\decode.c(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  encfrag.c
+  encinfo.c
+external\theoraplayer\external\theora\lib\dequant.c(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  encode.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\apiwrapper.h(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory (external\theoraplayer\external\theora\lib\encapiwrapper.c)
+  encoder_disabled.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\encinfo.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\apiwrapper.h(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory (external\theoraplayer\external\theora\lib\encoder_disabled.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\encfrag.c)
+  enquant.c
+  fdct.c
+  fragment.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\fdct.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\encode.c)
+  huffdec.c
+  huffenc.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\enquant.c)
+  idct.c
+external\theoraplayer\external\theora\lib\huffdec.c(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  infot.c
+external\theoraplayer\external\theora\lib\huffenc.c(3): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  internal.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\fragment.c)
+  mathops.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\idct.c)
+  mcenc.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\infot.c)
+  quant.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\internal.c)
+  rate.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\mathops.c)
+  state.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\mcenc.c)
+  tokenize.c
+external\theoraplayer\external\theora\lib\quant.c(20): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  mmxencfrag.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\rate.c)
+  mmxfdct.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\state.c)
+  mmxfrag.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\encint.h(19): fatal error C1083: Cannot open include file: 'theora/theoraenc.h': No such file or directory (external\theoraplayer\external\theora\lib\tokenize.c)
+  mmxidct.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\mmxfdct.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\mmxencfrag.c)
+  mmxstate.c
+  x86cpu.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\mmxfrag.c)
+  x86enc.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\mmxidct.c)
+  x86state.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\x86cpu.c)
+  analysis.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\mmxstate.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\x86enc.c)
+  bitrate.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\theora\lib\x86_vc\../internal.h(24): fatal error C1083: Cannot open include file: 'theora/codec.h': No such file or directory (external\theoraplayer\external\theora\lib\x86_vc\x86state.c)
+  block.c
+  codebook.c
+external\theoraplayer\external\vorbis\lib\analysis.c(21): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+external\theoraplayer\external\vorbis\lib\bitrate.c(21): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  envelope.c
+  floor0.c
+external\theoraplayer\external\vorbis\lib\codebook.c(21): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+external\theoraplayer\external\vorbis\lib\block.c(24): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  floor1.c
+  info.c
+external\theoraplayer\external\vorbis\lib\floor0.c(21): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+external\theoraplayer\external\vorbis\lib\info.c(24): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+external\theoraplayer\external\vorbis\lib\floor1.c(21): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  lookup.c
+  lpc.c
+  lsp.c
+external\theoraplayer\external\vorbis\lib\envelope.c(22): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  mapping0.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\vorbis\lib\os.h(25): fatal error C1083: Cannot open include file: 'ogg/os_types.h': No such file or directory (external\theoraplayer\external\vorbis\lib\lookup.c)
+  mdct.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\vorbis\lib\os.h(25): fatal error C1083: Cannot open include file: 'ogg/os_types.h': No such file or directory (external\theoraplayer\external\vorbis\lib\lsp.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\vorbis\lib\os.h(25): fatal error C1083: Cannot open include file: 'ogg/os_types.h': No such file or directory (external\theoraplayer\external\vorbis\lib\lpc.c)
+  psy.c
+  registry.c
+external\theoraplayer\external\vorbis\lib\mapping0.c(22): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+external\theoraplayer\external\vorbis\lib\registry.c(18): fatal error C1083: Cannot open include file: 'vorbis/codec.h': No such file or directory
+  res0.c
+  sharedbook.c
+external\theoraplayer\external\vorbis\lib\mdct.c(44): fatal error C1083: Cannot open include file: 'vorbis/codec.h': No such file or directory
+external\theoraplayer\external\vorbis\lib\psy.c(21): fatal error C1083: Cannot open include file: 'vorbis/codec.h': No such file or directory
+  smallft.c
+  synthesis.c
+external\theoraplayer\external\vorbis\lib\res0.c(26): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  vorbisenc.c
+external\theoraplayer\external\vorbis\lib\synthesis.c(19): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  vorbisfile.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\vorbis\lib\smallft.h(21): fatal error C1083: Cannot open include file: 'vorbis/codec.h': No such file or directory (external\theoraplayer\external\vorbis\lib\smallft.c)
+  window.c
+external\theoraplayer\external\vorbis\lib\vorbisenc.c(22): fatal error C1083: Cannot open include file: 'vorbis/codec.h': No such file or directory
+  yuv420_grey_c.c
+external\theoraplayer\external\vorbis\lib\sharedbook.c(21): fatal error C1083: Cannot open include file: 'ogg/ogg.h': No such file or directory
+  yuv420_rgb_c.c
+external\theoraplayer\external\vorbis\lib\vorbisfile.c(24): fatal error C1083: Cannot open include file: 'vorbis/codec.h': No such file or directory
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\external\vorbis\lib\os.h(25): fatal error C1083: Cannot open include file: 'ogg/os_types.h': No such file or directory (external\theoraplayer\external\vorbis\lib\window.c)
+  yuv420_yuv_c.c
+  yuv_c.c
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\src\yuv\c\yuv_c.h(12): fatal error C1083: Cannot open include file: 'TheoraPixelTransform.h': No such file or directory (external\theoraplayer\src\YUV\C\yuv420_grey_c.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\src\yuv\c\yuv_c.h(12): fatal error C1083: Cannot open include file: 'TheoraPixelTransform.h': No such file or directory (external\theoraplayer\src\YUV\C\yuv420_rgb_c.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\src\yuv\c\yuv_c.h(12): fatal error C1083: Cannot open include file: 'TheoraPixelTransform.h': No such file or directory (external\theoraplayer\src\YUV\C\yuv420_yuv_c.c)
+d:\yitian\onedrive\depthmrender\chai3d\external\theoraplayer\src\yuv\c\yuv_c.h(12): fatal error C1083: Cannot open include file: 'TheoraPixelTransform.h': No such file or directory (external\theoraplayer\src\YUV\C\yuv_c.c)

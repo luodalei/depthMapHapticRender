@@ -1,0 +1,286 @@
+﻿Build started 10/8/2015 4:54:58 PM.
+     1>Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\ODE\CODE-VS2013.vcxproj" on node 5 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../../src /I../../external/glew/include /I../../external/Eigen /Iexternal/ODE/include /Iexternal/ODE/ode/src /Iexternal/ODE/ode/src/joints /Iexternal/ODE/OPCODE /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _CRT_SECURE_NO_WARNINGS /D ODE_LIB /D dDOUBLE /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj/Debug/Win32\\" /Fd"obj/Debug/Win32\vc120.pdb" /Gd /TP /wd4244 /wd4267 /analyze- /errorReport:prompt /MP external\ODE\ode\src\array.cpp external\ODE\ode\src\box.cpp external\ODE\ode\src\capsule.cpp external\ODE\ode\src\collision_cylinder_box.cpp external\ODE\ode\src\collision_cylinder_plane.cpp external\ODE\ode\src\collision_cylinder_sphere.cpp external\ODE\ode\src\collision_cylinder_trimesh.cpp external\ODE\ode\src\collision_kernel.cpp external\ODE\ode\src\collision_quadtreespace.cpp external\ODE\ode\src\collision_sapspace.cpp external\ODE\ode\src\collision_space.cpp external\ODE\ode\src\collision_transform.cpp external\ODE\ode\src\collision_trimesh_box.cpp external\ODE\ode\src\collision_trimesh_ccylinder.cpp external\ODE\ode\src\collision_trimesh_disabled.cpp external\ODE\ode\src\collision_trimesh_distance.cpp external\ODE\ode\src\collision_trimesh_gimpact.cpp external\ODE\ode\src\collision_trimesh_opcode.cpp external\ODE\ode\src\collision_trimesh_plane.cpp external\ODE\ode\src\collision_trimesh_ray.cpp external\ODE\ode\src\collision_trimesh_sphere.cpp external\ODE\ode\src\collision_trimesh_trimesh.cpp external\ODE\ode\src\collision_trimesh_trimesh_new.cpp external\ODE\ode\src\collision_util.cpp external\ODE\ode\src\convex.cpp external\ODE\ode\src\cylinder.cpp external\ODE\ode\src\error.cpp "external\ODE\ode\src\export-dif.cpp" external\ODE\ode\src\heightfield.cpp external\ODE\ode\src\joints\amotor.cpp external\ODE\ode\src\joints\ball.cpp external\ODE\ode\src\joints\contact.cpp external\ODE\ode\src\joints\fixed.cpp external\ODE\ode\src\joints\hinge.cpp external\ODE\ode\src\joints\hinge2.cpp external\ODE\ode\src\joints\joint.cpp external\ODE\ode\src\joints\lmotor.cpp external\ODE\ode\src\joints\null.cpp external\ODE\ode\src\joints\piston.cpp external\ODE\ode\src\joints\plane2d.cpp external\ODE\ode\src\joints\pr.cpp external\ODE\ode\src\joints\pu.cpp external\ODE\ode\src\joints\slider.cpp external\ODE\ode\src\joints\universal.cpp external\ODE\ode\src\lcp.cpp external\ODE\ode\src\mass.cpp external\ODE\ode\src\mat.cpp external\ODE\ode\src\matrix.cpp external\ODE\ode\src\memory.cpp external\ODE\ode\src\misc.cpp external\ODE\ode\src\obstack.cpp external\ODE\ode\src\ode.cpp external\ODE\ode\src\odeinit.cpp external\ODE\ode\src\odemath.cpp external\ODE\ode\src\odeou.cpp external\ODE\ode\src\odetls.cpp external\ODE\ode\src\plane.cpp external\ODE\ode\src\quickstep.cpp external\ODE\ode\src\ray.cpp external\ODE\ode\src\rotation.cpp external\ODE\ode\src\sphere.cpp external\ODE\ode\src\step.cpp external\ODE\ode\src\stepfast.cpp external\ODE\ode\src\testing.cpp external\ODE\ode\src\timer.cpp external\ODE\ode\src\util.cpp external\ODE\OPCODE\Ice\IceAABB.cpp external\ODE\OPCODE\Ice\IceContainer.cpp external\ODE\OPCODE\Ice\IceHPoint.cpp external\ODE\OPCODE\Ice\IceIndexedTriangle.cpp external\ODE\OPCODE\Ice\IceMatrix3x3.cpp external\ODE\OPCODE\Ice\IceMatrix4x4.cpp external\ODE\OPCODE\Ice\IceOBB.cpp external\ODE\OPCODE\Ice\IcePlane.cpp external\ODE\OPCODE\Ice\IcePoint.cpp external\ODE\OPCODE\Ice\IceRandom.cpp external\ODE\OPCODE\Ice\IceRay.cpp external\ODE\OPCODE\Ice\IceRevisitedRadix.cpp external\ODE\OPCODE\Ice\IceSegment.cpp external\ODE\OPCODE\Ice\IceTriangle.cpp external\ODE\OPCODE\Ice\IceUtils.cpp external\ODE\OPCODE\Opcode.cpp external\ODE\OPCODE\OPC_AABBCollider.cpp external\ODE\OPCODE\OPC_AABBTree.cpp external\ODE\OPCODE\OPC_BaseModel.cpp external\ODE\OPCODE\OPC_Collider.cpp external\ODE\OPCODE\OPC_Common.cpp external\ODE\OPCODE\OPC_HybridModel.cpp external\ODE\OPCODE\OPC_LSSCollider.cpp external\ODE\OPCODE\OPC_MeshInterface.cpp external\ODE\OPCODE\OPC_Model.cpp external\ODE\OPCODE\OPC_OBBCollider.cpp external\ODE\OPCODE\OPC_OptimizedTree.cpp external\ODE\OPCODE\OPC_Picking.cpp external\ODE\OPCODE\OPC_PlanesCollider.cpp external\ODE\OPCODE\OPC_RayCollider.cpp external\ODE\OPCODE\OPC_SphereCollider.cpp external\ODE\OPCODE\OPC_TreeBuilders.cpp external\ODE\OPCODE\OPC_TreeCollider.cpp external\ODE\OPCODE\OPC_VolumeCollider.cpp src\CODEGenericBody.cpp src\CODEWorld.cpp
+         array.cpp
+         box.cpp
+         capsule.cpp
+         collision_cylinder_box.cpp
+         collision_cylinder_plane.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\box.cpp(389): warning C4056: overflow in floating-point constant arithmetic
+         collision_cylinder_sphere.cpp
+         collision_cylinder_trimesh.cpp
+         collision_kernel.cpp
+         collision_quadtreespace.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_quadtreespace.cpp(371): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_quadtreespace.cpp(373): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_quadtreespace.cpp(375): warning C4056: overflow in floating-point constant arithmetic
+         collision_sapspace.cpp
+         collision_space.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_sapspace.cpp(265): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_sapspace.cpp(267): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_sapspace.cpp(269): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_space.cpp(122): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_cylinder_trimesh.cpp(285): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_space.cpp(124): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_space.cpp(126): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_space.cpp(333): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_space.cpp(334): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_space.cpp(335): warning C4056: overflow in floating-point constant arithmetic
+         collision_transform.cpp
+         collision_trimesh_box.cpp
+         collision_trimesh_ccylinder.cpp
+         collision_trimesh_disabled.cpp
+         collision_trimesh_distance.cpp
+         collision_trimesh_gimpact.cpp
+         collision_trimesh_opcode.cpp
+         collision_trimesh_plane.cpp
+         collision_trimesh_ray.cpp
+         collision_trimesh_sphere.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_trimesh_opcode.cpp(125): warning C4056: overflow in floating-point constant arithmetic
+         collision_trimesh_trimesh.cpp
+         collision_trimesh_trimesh_new.cpp
+         collision_util.cpp
+         convex.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_util.cpp(458): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_util.cpp(460): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_util.cpp(462): warning C4056: overflow in floating-point constant arithmetic
+         cylinder.cpp
+         error.cpp
+         export-dif.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\export-dif.cpp(78): warning C4056: overflow in floating-point constant arithmetic
+         heightfield.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\collision_trimesh_trimesh_new.cpp(954): warning C4056: overflow in floating-point constant arithmetic
+         amotor.cpp
+         ball.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(170): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(185): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(200): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(215): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(486): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(495): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(496): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(497): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(587): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(588): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(589): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(593): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(595): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(694): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\heightfield.cpp(965): warning C4056: overflow in floating-point constant arithmetic
+         contact.cpp
+         fixed.cpp
+         hinge.cpp
+         hinge2.cpp
+         joint.cpp
+         lmotor.cpp
+         null.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\joint.cpp(447): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\joint.cpp(659): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\joint.cpp(673): warning C4056: overflow in floating-point constant arithmetic
+         piston.cpp
+         plane2d.cpp
+         pr.cpp
+         pu.cpp
+         slider.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\pr.cpp(187): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\pu.cpp(215): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\piston.cpp(183): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\piston.cpp(197): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\joints\slider.cpp(119): warning C4056: overflow in floating-point constant arithmetic
+         universal.cpp
+         lcp.cpp
+         mass.cpp
+         mat.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\lcp.cpp(845): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\lcp.cpp(1606): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\lcp.cpp(1630): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\lcp.cpp(1908): warning C4056: overflow in floating-point constant arithmetic
+         matrix.cpp
+         memory.cpp
+         misc.cpp
+         obstack.cpp
+         ode.cpp
+         odeinit.cpp
+         odemath.cpp
+         odeou.cpp
+         odetls.cpp
+         plane.cpp
+         quickstep.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\plane.cpp(81): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\plane.cpp(83): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\plane.cpp(85): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\plane.cpp(93): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\plane.cpp(98): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\plane.cpp(103): warning C4056: overflow in floating-point constant arithmetic
+         ray.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\quickstep.cpp(658): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\ray.cpp(309): warning C4056: overflow in floating-point constant arithmetic
+         rotation.cpp
+         sphere.cpp
+         step.cpp
+         stepfast.cpp
+         testing.cpp
+         timer.cpp
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\stepfast.cpp(729): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\step.cpp(415): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\yitian\depth rendering proj supplemental materials\chai3d-3.0.0\modules\ode\external\ode\ode\src\step.cpp(731): warning C4056: overflow in floating-point constant arithmetic
+         util.cpp
+         IceAABB.cpp
+         IceContainer.cpp
+         IceHPoint.cpp
+         IceIndexedTriangle.cpp
+         IceMatrix3x3.cpp
+         IceMatrix4x4.cpp
+         IceOBB.cpp
+         IcePlane.cpp
+         IcePoint.cpp
+         IceRandom.cpp
+         IceRay.cpp
+         IceRevisitedRadix.cpp
+         IceSegment.cpp
+         IceTriangle.cpp
+         IceUtils.cpp
+         Opcode.cpp
+         OPC_AABBCollider.cpp
+         OPC_AABBTree.cpp
+         OPC_BaseModel.cpp
+         OPC_Collider.cpp
+         OPC_Common.cpp
+         OPC_HybridModel.cpp
+         OPC_LSSCollider.cpp
+         OPC_MeshInterface.cpp
+         OPC_Model.cpp
+         OPC_OBBCollider.cpp
+         OPC_OptimizedTree.cpp
+         OPC_Picking.cpp
+         OPC_PlanesCollider.cpp
+         OPC_RayCollider.cpp
+         OPC_SphereCollider.cpp
+         OPC_TreeBuilders.cpp
+         OPC_TreeCollider.cpp
+         OPC_VolumeCollider.cpp
+         CODEGenericBody.cpp
+         CODEWorld.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../../src /I../../external/glew/include /I../../external/Eigen /Iexternal/ODE/include /Iexternal/ODE/ode/src /Iexternal/ODE/ode/src/joints /Iexternal/ODE/OPCODE /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _CRT_SECURE_NO_WARNINGS /D ODE_LIB /D dDOUBLE /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj/Debug/Win32\\" /Fd"obj/Debug/Win32\vc120.pdb" /Gd /TC /wd4244 /wd4267 /analyze- /errorReport:prompt /MP external\ODE\ode\src\fastdot.c external\ODE\ode\src\fastldlt.c external\ODE\ode\src\fastlsolve.c external\ODE\ode\src\fastltsolve.c
+         fastdot.c
+         fastldlt.c
+         fastlsolve.c
+         fastltsolve.c
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"lib/Debug/Win32\CODE.lib" /NOLOGO obj/Debug/Win32\array.obj
+         obj/Debug/Win32\box.obj
+         obj/Debug/Win32\capsule.obj
+         obj/Debug/Win32\collision_cylinder_box.obj
+         obj/Debug/Win32\collision_cylinder_plane.obj
+         obj/Debug/Win32\collision_cylinder_sphere.obj
+         obj/Debug/Win32\collision_cylinder_trimesh.obj
+         obj/Debug/Win32\collision_kernel.obj
+         obj/Debug/Win32\collision_quadtreespace.obj
+         obj/Debug/Win32\collision_sapspace.obj
+         obj/Debug/Win32\collision_space.obj
+         obj/Debug/Win32\collision_transform.obj
+         obj/Debug/Win32\collision_trimesh_box.obj
+         obj/Debug/Win32\collision_trimesh_ccylinder.obj
+         obj/Debug/Win32\collision_trimesh_disabled.obj
+         obj/Debug/Win32\collision_trimesh_distance.obj
+         obj/Debug/Win32\collision_trimesh_gimpact.obj
+         obj/Debug/Win32\collision_trimesh_opcode.obj
+         obj/Debug/Win32\collision_trimesh_plane.obj
+         obj/Debug/Win32\collision_trimesh_ray.obj
+         obj/Debug/Win32\collision_trimesh_sphere.obj
+         obj/Debug/Win32\collision_trimesh_trimesh.obj
+         obj/Debug/Win32\collision_trimesh_trimesh_new.obj
+         obj/Debug/Win32\collision_util.obj
+         obj/Debug/Win32\convex.obj
+         obj/Debug/Win32\cylinder.obj
+         obj/Debug/Win32\error.obj
+         "obj/Debug/Win32\export-dif.obj"
+         obj/Debug/Win32\fastdot.obj
+         obj/Debug/Win32\fastldlt.obj
+         obj/Debug/Win32\fastlsolve.obj
+         obj/Debug/Win32\fastltsolve.obj
+         obj/Debug/Win32\heightfield.obj
+         obj/Debug/Win32\amotor.obj
+         obj/Debug/Win32\ball.obj
+         obj/Debug/Win32\contact.obj
+         obj/Debug/Win32\fixed.obj
+         obj/Debug/Win32\hinge.obj
+         obj/Debug/Win32\hinge2.obj
+         obj/Debug/Win32\joint.obj
+         obj/Debug/Win32\lmotor.obj
+         obj/Debug/Win32\null.obj
+         obj/Debug/Win32\piston.obj
+         obj/Debug/Win32\plane2d.obj
+         obj/Debug/Win32\pr.obj
+         obj/Debug/Win32\pu.obj
+         obj/Debug/Win32\slider.obj
+         obj/Debug/Win32\universal.obj
+         obj/Debug/Win32\lcp.obj
+         obj/Debug/Win32\mass.obj
+         obj/Debug/Win32\mat.obj
+         obj/Debug/Win32\matrix.obj
+         obj/Debug/Win32\memory.obj
+         obj/Debug/Win32\misc.obj
+         obj/Debug/Win32\obstack.obj
+         obj/Debug/Win32\ode.obj
+         obj/Debug/Win32\odeinit.obj
+         obj/Debug/Win32\odemath.obj
+         obj/Debug/Win32\odeou.obj
+         obj/Debug/Win32\odetls.obj
+         obj/Debug/Win32\plane.obj
+         obj/Debug/Win32\quickstep.obj
+         obj/Debug/Win32\ray.obj
+         obj/Debug/Win32\rotation.obj
+         obj/Debug/Win32\sphere.obj
+         obj/Debug/Win32\step.obj
+         obj/Debug/Win32\stepfast.obj
+         obj/Debug/Win32\testing.obj
+         obj/Debug/Win32\timer.obj
+         obj/Debug/Win32\util.obj
+         obj/Debug/Win32\IceAABB.obj
+         obj/Debug/Win32\IceContainer.obj
+         obj/Debug/Win32\IceHPoint.obj
+         obj/Debug/Win32\IceIndexedTriangle.obj
+         obj/Debug/Win32\IceMatrix3x3.obj
+         obj/Debug/Win32\IceMatrix4x4.obj
+         obj/Debug/Win32\IceOBB.obj
+         obj/Debug/Win32\IcePlane.obj
+         obj/Debug/Win32\IcePoint.obj
+         obj/Debug/Win32\IceRandom.obj
+         obj/Debug/Win32\IceRay.obj
+         obj/Debug/Win32\IceRevisitedRadix.obj
+         obj/Debug/Win32\IceSegment.obj
+         obj/Debug/Win32\IceTriangle.obj
+         obj/Debug/Win32\IceUtils.obj
+         obj/Debug/Win32\Opcode.obj
+         obj/Debug/Win32\OPC_AABBCollider.obj
+         obj/Debug/Win32\OPC_AABBTree.obj
+         obj/Debug/Win32\OPC_BaseModel.obj
+         obj/Debug/Win32\OPC_Collider.obj
+         obj/Debug/Win32\OPC_Common.obj
+         obj/Debug/Win32\OPC_HybridModel.obj
+         obj/Debug/Win32\OPC_LSSCollider.obj
+         obj/Debug/Win32\OPC_MeshInterface.obj
+         obj/Debug/Win32\OPC_Model.obj
+         obj/Debug/Win32\OPC_OBBCollider.obj
+         obj/Debug/Win32\OPC_OptimizedTree.obj
+         obj/Debug/Win32\OPC_Picking.obj
+         obj/Debug/Win32\OPC_PlanesCollider.obj
+         obj/Debug/Win32\OPC_RayCollider.obj
+         obj/Debug/Win32\OPC_SphereCollider.obj
+         obj/Debug/Win32\OPC_TreeBuilders.obj
+         obj/Debug/Win32\OPC_TreeCollider.obj
+         obj/Debug/Win32\OPC_VolumeCollider.obj
+         obj/Debug/Win32\CODEGenericBody.obj
+         obj/Debug/Win32\CODEWorld.obj
+     1>OPC_Picking.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+     1>OPC_Common.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+     1>odetls.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+     1>collision_trimesh_gimpact.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+         CODE-VS2013.vcxproj -> D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\ODE\lib/Debug/Win32\CODE.lib
+     1>Done Building Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\ODE\CODE-VS2013.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:19.14

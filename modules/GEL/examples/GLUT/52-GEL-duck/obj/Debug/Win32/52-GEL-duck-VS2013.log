@@ -1,0 +1,18 @@
+﻿Build started 10/8/2015 4:55:56 PM.
+     1>Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\GEL\examples\GLUT\52-GEL-duck\52-GEL-duck-VS2013.vcxproj" on node 5 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../../../src /I../../../../../src /I../../../../../external/Eigen /I../../../../../external/glew/include /I../../../../../extras/freeglut/include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _MSVC /D _CRT_SECURE_NO_WARNINGS /D TETLIBRARY /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"obj/Debug/Win32\\" /Fd"obj/Debug/Win32\vc120.pdb" /Gd /TP /wd4244 /wd4305 /analyze- /errorReport:prompt /MP "52-GEL-duck.cpp" predicates.cpp tetgen.cpp
+         52-GEL-duck.cpp
+         predicates.cpp
+         tetgen.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"../../../bin\52-GEL-duck.exe" /INCREMENTAL /NOLOGO /LIBPATH:../../../lib/Debug/Win32 /LIBPATH:../../../../../lib/Debug/Win32 /LIBPATH:../../../../../extras/freeglut/lib/Debug/Win32 freeglut.lib chai3d.lib GEL.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB:msvcrt.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"../../../bin\GEL-duck.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"../../../bin\52-GEL-duck.lib" /MACHINE:X86 /SAFESEH "obj/Debug/Win32\52-GEL-duck.obj"
+         obj/Debug/Win32\predicates.obj
+         obj/Debug/Win32\tetgen.obj
+     1>52-GEL-duck.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+         52-GEL-duck-VS2013.vcxproj -> D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\GEL\examples\GLUT\52-GEL-duck\../../../bin\52-GEL-duck.exe
+     1>Done Building Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\GEL\examples\GLUT\52-GEL-duck\52-GEL-duck-VS2013.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.01
