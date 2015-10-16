@@ -1,0 +1,25 @@
+﻿Build started 10/8/2015 4:54:58 PM.
+     1>Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\GEL\GEL-VS2013.vcxproj" on node 4 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../../src /I../../external/glew/include /I../../external/Eigen /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _CRT_SECURE_NO_WARNINGS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj/Debug/Win32\\" /Fd"obj/Debug/Win32\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt /MP src\CGELLinearSpring.cpp src\CGELMassParticle.cpp src\CGELMesh.cpp src\CGELSkeletonLink.cpp src\CGELSkeletonNode.cpp src\CGELVertex.cpp src\CGELWorld.cpp
+         CGELLinearSpring.cpp
+         CGELMassParticle.cpp
+         CGELMesh.cpp
+         CGELSkeletonLink.cpp
+         CGELSkeletonNode.cpp
+         CGELVertex.cpp
+         CGELWorld.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"lib/Debug/Win32\GEL.lib" /NOLOGO obj/Debug/Win32\CGELLinearSpring.obj
+         obj/Debug/Win32\CGELMassParticle.obj
+         obj/Debug/Win32\CGELMesh.obj
+         obj/Debug/Win32\CGELSkeletonLink.obj
+         obj/Debug/Win32\CGELSkeletonNode.obj
+         obj/Debug/Win32\CGELVertex.obj
+         obj/Debug/Win32\CGELWorld.obj
+         GEL-VS2013.vcxproj -> D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\GEL\lib/Debug/Win32\GEL.lib
+     1>Done Building Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\modules\GEL\GEL-VS2013.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:16.46

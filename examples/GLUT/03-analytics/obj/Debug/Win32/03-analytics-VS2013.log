@@ -1,0 +1,13 @@
+﻿Build started 10/8/2015 4:55:42 PM.
+     1>Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\examples\GLUT\03-analytics\03-analytics-VS2013.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../../../src /I../../../external/Eigen /I../../../external/glew/include /I../../../extras/freeglut/include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _MSVC /D _CRT_SECURE_NO_WARNINGS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"obj/Debug/Win32\\" /Fd"obj/Debug/Win32\vc120.pdb" /Gd /TP /wd4244 /wd4305 /analyze- /errorReport:prompt /MP "03-analytics.cpp"
+         03-analytics.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"../../../bin\03-analytics.exe" /INCREMENTAL /NOLOGO /LIBPATH:../../../lib/Debug/Win32 /LIBPATH:../../../extras/freeglut/lib/Debug/Win32 freeglut.lib chai3d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\bin\03-analytics.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"../../../bin\03-analytics.lib" /MACHINE:X86 /SAFESEH "obj/Debug/Win32\03-analytics.obj"
+         03-analytics-VS2013.vcxproj -> D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\examples\GLUT\03-analytics\../../../bin\03-analytics.exe
+     1>Done Building Project "D:\Yitian\Depth Rendering Proj Supplemental Materials\chai3d-3.0.0\examples\GLUT\03-analytics\03-analytics-VS2013.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.34
