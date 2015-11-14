@@ -3,11 +3,17 @@
     \author    Yitian Shao
 	\templete from <http://www.chai3d.org>
 	\created 10/13/2015 
+
+	This is the second step on realizing depth map haptic rendering.
+	The goal here is to import a depth map image in format like '.png' and 
+	construct a 3D surface through a mesh. Then rendering it.
 */
 //==============================================================================
 
 //------------------------------------------------------------------------------
 #include "chai3d.h"
+//#include "png.h" // use libpng to load png image?
+//#include <cstdio> // use libpng to load png image?
 //------------------------------------------------------------------------------
 using namespace chai3d;
 using namespace std;
@@ -75,6 +81,18 @@ cToolCursor* tool;
 /*10/13/2015-Add 3D object to display depth map as displacement map*/
 cMultiMesh* object;
 
+/*11/13/2015 a mesh object for debbuging*/
+cMesh* plane0;
+
+/*11/13/2015 a depth image*/
+cImage* depthImage;
+
+/*11/13/2015 a label for debugging purpose*/
+cLabel* debuggingLabel;
+
+/*11/13/2015 a depth value*/
+cColorb depthValue;
+
 // flag to indicate if the haptic simulation currently running
 bool simulationRunning = false;
 
@@ -92,6 +110,8 @@ int windowH;
 int windowPosX;
 int windowPosY;
 
+/*11/13/2015 an matrix containing depth values*/
+float depthMat[540][960];
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -129,7 +149,6 @@ int main(int argc, char* argv[])
     cout << "[f] - Enable/Disable full screen mode" << endl;
     cout << "[x] - Exit application" << endl;
     cout << endl << endl;
-
 
     //--------------------------------------------------------------------------
     // OPENGL - WINDOW DISPLAY
@@ -177,6 +196,60 @@ int main(int argc, char* argv[])
         glutFullScreen();
     }
 
+	//--------------------------------------------------------------------------
+	// LOAD FILE [11/13/2015 - present]
+	//--------------------------------------------------------------------------
+	
+	//=====================================================================================================
+	// create a new image
+	depthImage = new cImage(windowW, windowH, GL_RGB, GL_UNSIGNED_INT);
+
+	// import the depth image from a .png file
+	fileload = depthImage->loadFromFile("../bin/resources/image/rabbit.png");
+	if (!fileload)
+	{
+		cout << "Error - Image failed to load correctly." << endl;
+		close();
+		return (-1);
+	}
+
+	//--------------------------------------------------------------------------
+	// Read depth value from each pixel of the depth image [11/13/2015 - present]
+	//--------------------------------------------------------------------------
+	// check whether the command is succefully executed
+	bool isRight;
+	//int dpVal[4];
+
+	// depth map row (Height) and column (Width) length
+	int mapRowNum, mapColNum;
+	mapRowNum = depthImage->getHeight();
+	mapColNum = depthImage->getWidth();
+
+	for (int i = 0; i < mapRowNum; i++)
+	{
+		for (int j = 0; j < mapColNum; j++)
+		{
+			isRight = depthImage->getPixelColor(j, i, depthValue);
+
+			if (isRight == false)
+			{
+				cout << "error - failed! [" + to_string(i) + "," + to_string(j) + "]" << endl;
+			}
+
+			// For gray scale image, R = G = B = GrayScale
+			depthMat[i][j] = depthValue.m_color[0]; // Extract R Value as depth information
+
+			depthMat[i][j] = depthMat[i][j] / 255;	// Normalize the depth image to [0 , 1] scale
+
+			//if (depthMat[i][j] < 0.2) // Used for checking the depth values
+			//{
+			//	cout << "Position[" + to_string(i) + "," + to_string(j) + "] = " + to_string(depthMat[i][j]) << endl;
+			//}
+		}
+		cout << endl;
+	}
+
+	//======================================================================================================
 
     //--------------------------------------------------------------------------
     // WORLD - CAMERA - LIGHTING
@@ -228,18 +301,6 @@ int main(int argc, char* argv[])
 	light->m_diffuse.set(0.4, 0.4, 0.4);
 	light->m_specular.set(1.0, 1.0, 1.0);
 
-	/*10/13/2015-Add 2D texture object to display 2D depth map as grayscale image*/
-	/*depthMapImage = new cTexture2d();
-
-	fileload = depthMapImage->loadFromFile("../bin/resources/images/rabbit.jpg");
-
-	if (!fileload)
-	{
-		cout << "Error - Texture image failed to load correctly." << endl;
-		close();
-		return (-1);
-	}*/
-
     //--------------------------------------------------------------------------
     // HAPTIC DEVICE
     //--------------------------------------------------------------------------
@@ -286,6 +347,7 @@ int main(int argc, char* argv[])
 
 	//--------------------------------------------------------------------------
 	// CREATE OBJECT
+	// Import a Depth image instead of a 3D displacement map
 	//--------------------------------------------------------------------------
 
 	// read the scale factor between the physical workspace of the haptic
@@ -301,20 +363,51 @@ int main(int argc, char* argv[])
 	// add object to world
 	world->addChild(object);
 
-	// load an object file
-	bool fileload;
-	fileload = object->loadFromFile("../bin/resources/model/displacement_map.obj"); //x-up,z-forward ouput
-	//fileload = object->loadFromFile("../bin/resources/model/disp_map_squirrel.obj"); //Squirrel	
-	//fileload = object->loadFromFile("../bin/resources/model/displacement_map_512subdiv.obj"); // High resolution subdivided surface, server computer needed!!!
+	/////////////////////////////////////////////////////////////////////////
+	// PLANE 0:
+	/////////////////////////////////////////////////////////////////////////
+	const int PlaneW = 1.6;
+	const int PlaneH = 0.9;
 
-	if (!fileload)
+	// create a mesh
+	plane0 = new cMesh();
+
+	// create plane
+	cCreatePlane(plane0, 0.3, 0.3);
+
+	// create collision detector
+	plane0->createAABBCollisionDetector(toolRadius);
+
+	// add object to world
+	world->addChild(plane0);
+
+	// set the position of the object
+	plane0->setLocalPos(-0.8, -0.45, 0.0);
+
+	// set graphic properties
+	//plane0->m_texture = cTexture2d::create();
+	//plane0->m_texture = ;
+
+	cColorf color0;
+	color0.setBlueCadet();
+
+	for (int i = 0; i < mapRowNum; i++)
 	{
-		cout << "Error - 3D Model failed to load correctly" << endl;
-		close();
-		return (-1);
+		for (int j = 0; j < mapColNum; j++)
+		{
+			unsigned int vertexIndex0 = plane0->newVertex((-0.8 + 0.0016*j), (-0.45 + 0.0016*i), depthMat[i][j], 1.0, 0.0, 0.0, (-0.8 + 0.0016*j), (-0.45 + 0.0016*i), depthMat[i][j]);
+
+			// define vertex color			
+			plane0->m_vertices->setColor(vertexIndex0, color0);
+	
+		}
 	}
 
-	// disable culling so that faces are rendered on both sides??????
+	//Original method in 10/13/2015 : Import a 3D displacement map (object)
+	//fileload = object->loadFromFile("../bin/resources/model/displacement_map.obj"); 
+	//(x-up,z-forward output)
+
+	// disable culling so that faces are rendered on both sides
 	//object->setUseCulling(false);
 
 	// get dimensions of object
@@ -363,6 +456,11 @@ int main(int argc, char* argv[])
     labelHapticRate = new cLabel(font);
     camera->m_frontLayer->addChild(labelHapticRate);
 
+	//=============================================================================
+	// add a real-time debugging label
+	//debuggingLabel = new cLabel(font);
+	//camera->m_frontLayer->addChild(debuggingLabel);
+	//=============================================================================
 
     //--------------------------------------------------------------------------
     // START SIMULATION
@@ -465,6 +563,13 @@ void updateGraphics(void)
 
     // update position of label
     labelHapticRate->setLocalPos((int)(0.5 * (windowW - labelHapticRate->getWidth())), 15);
+
+	//======================================================================
+	// display real-time debugging label 
+	//debuggingLabel->setString("Image Pixel Value = " + to_string());
+	//debuggingLabel->setLocalPos((int)(0.5 * (windowW - debuggingLabel->getWidth())), 40);
+
+	//======================================================================
 
 
     /////////////////////////////////////////////////////////////////////

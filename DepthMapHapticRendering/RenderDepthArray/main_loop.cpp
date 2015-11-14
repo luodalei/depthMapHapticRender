@@ -3,6 +3,9 @@
     \author    Yitian Shao
 	\templete from <http://www.chai3d.org>
 	\created 10/13/2015 
+	
+	This program imports a 3D displacement map and renders it in Chai3D. 
+	This is just the first step to perform depth map haptic rendering.
 */
 //==============================================================================
 
