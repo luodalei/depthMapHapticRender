@@ -12,6 +12,9 @@
 
 //------------------------------------------------------------------------------
 #include "chai3d.h"
+#include "cMultiMesh.h" // Header file for this program
+//#include <iostream>
+//#include <fstream>
 //#include "png.h" // use libpng to load png image?
 //#include <cstdio> // use libpng to load png image?
 //------------------------------------------------------------------------------
@@ -79,7 +82,8 @@ cLabel* labelHapticRate;
 cToolCursor* tool;
 
 /*10/13/2015-Add 3D object to display depth map as displacement map*/
-cMultiMesh* object;
+//cMultiMesh* object;
+cMesh* object; // Mesh object? 11/19/2015
 
 /*11/13/2015 a mesh object for debbuging*/
 cMesh* plane0;
@@ -111,7 +115,7 @@ int windowPosX;
 int windowPosY;
 
 /*11/13/2015 an matrix containing depth values*/
-float depthMat[540][960];
+float depthMatrix[IMAGE_HEIGHT][IMAGE_WIDTH];
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -134,6 +138,9 @@ void close(void);
 
 // main haptics simulation loop
 void updateHaptics(void);
+
+// Load image to an 2D array 
+int loadImage(string imgPath, int* imgSize, float depthMat[][IMAGE_WIDTH]);
 
 int main(int argc, char* argv[])
 {
@@ -196,58 +203,25 @@ int main(int argc, char* argv[])
         glutFullScreen();
     }
 
-	//--------------------------------------------------------------------------
-	// LOAD FILE [11/13/2015 - present]
-	//--------------------------------------------------------------------------
-	
 	//=====================================================================================================
-	// create a new image
-	depthImage = new cImage(windowW, windowH, GL_RGB, GL_UNSIGNED_INT);
+	string imagePath = "../bin/resources/image/rabbit.png";
+	int imageSize[2];
 
-	// import the depth image from a .png file
-	fileload = depthImage->loadFromFile("../bin/resources/image/rabbit.png");
-	if (!fileload)
-	{
-		cout << "Error - Image failed to load correctly." << endl;
-		close();
-		return (-1);
-	}
+	loadImage(imagePath, imageSize, depthMatrix); // Load the depth matrix into an 2D array
 
-	//--------------------------------------------------------------------------
-	// Read depth value from each pixel of the depth image [11/13/2015 - present]
-	//--------------------------------------------------------------------------
-	// check whether the command is succefully executed
-	bool isRight;
-	//int dpVal[4];
-
-	// depth map row (Height) and column (Width) length
-	int mapRowNum, mapColNum;
-	mapRowNum = depthImage->getHeight();
-	mapColNum = depthImage->getWidth();
-
-	for (int i = 0; i < mapRowNum; i++)
-	{
-		for (int j = 0; j < mapColNum; j++)
-		{
-			isRight = depthImage->getPixelColor(j, i, depthValue);
-
-			if (isRight == false)
-			{
-				cout << "error - failed! [" + to_string(i) + "," + to_string(j) + "]" << endl;
-			}
-
-			// For gray scale image, R = G = B = GrayScale
-			depthMat[i][j] = depthValue.m_color[0]; // Extract R Value as depth information
-
-			depthMat[i][j] = depthMat[i][j] / 255;	// Normalize the depth image to [0 , 1] scale
-
-			//if (depthMat[i][j] < 0.2) // Used for checking the depth values
-			//{
-			//	cout << "Position[" + to_string(i) + "," + to_string(j) + "] = " + to_string(depthMat[i][j]) << endl;
-			//}
-		}
-		cout << endl;
-	}
+	// =================== for test only : write data to .txt file (11/19/2015)
+	//ofstream outFile;
+	//outFile.open("Map.txt");
+	//for (int i = 0; i < IMAGE_HEIGHT; i++)
+	//{
+	//	for (int j = 0; j < IMAGE_WIDTH; j++)
+	//	{
+	//		outFile << depthMatrix[i][j] << " ";
+	//	}
+	//	outFile << endl;
+	//}
+	//outFile.close();
+	// =================== for test only
 
 	//======================================================================================================
 
@@ -266,7 +240,10 @@ int main(int argc, char* argv[])
 	world->addChild(camera);
 
 	// position and orient the camera
-	camera->set(cVector3d(0.6, 0.0, 0),    // camera position (eye)
+	//camera->set(cVector3d(0.6, 0.0, 0),    // camera position (eye)
+	//	cVector3d(0.0, 0.0, 0.0),    // lookat position (target)
+	//	cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
+	camera->set(cVector3d(1.0, -0.175, 0.0),    // camera position (eye)
 		cVector3d(0.0, 0.0, 0.0),    // lookat position (target)
 		cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
 
@@ -279,10 +256,13 @@ int main(int argc, char* argv[])
 
 	// set stereo eye separation and focal length (applies only if stereo is enabled)
 	camera->setStereoEyeSeparation(0.03);
-	camera->setStereoFocalLength(1.5);
+	camera->setStereoFocalLength(1.5); //3.0?
 
 	// enable multi-pass rendering to handle transparent objects
 	camera->setUseMultipassTransparency(true);
+
+	// disable vertical mirrored display mode
+	camera->setMirrorVertical(false);
 
 	// create a light source
 	light = new cDirectionalLight(world);
@@ -294,11 +274,11 @@ int main(int argc, char* argv[])
 	light->setEnabled(true);
 
 	// define the direction of the light beam
-	light->setDir(-3.0, -0.5, 0.0);
+	light->setDir(-2.0, 0.0, 1.0);
 
 	// set lighting conditions
 	light->m_ambient.set(0.1, 0.1, 0.1);
-	light->m_diffuse.set(0.4, 0.4, 0.4);
+	light->m_diffuse.set(0.5, 0.5, 0.5);
 	light->m_specular.set(1.0, 1.0, 1.0);
 
     //--------------------------------------------------------------------------
@@ -333,20 +313,20 @@ int main(int argc, char* argv[])
 	// define a radius for the tool
 	tool->setRadius(toolRadius);
 
-	// hide the device sphere. only show proxy.
+	// show the device sphere. hide proxy.
 	tool->setShowContactPoints(true, false);
 
-	// create a white cursor
+	// create a red cursor
 	tool->m_hapticPoint->m_sphereProxy->m_material->setRed();
 
-	// map the physical workspace of the haptic device to a larger virtual workspace.
+	// map the physical workspace of the haptic device to a ? virtual workspace.
 	tool->setWorkspaceRadius(1.0);
 
 	// start the haptic tool
 	tool->start();
 
 	//--------------------------------------------------------------------------
-	// CREATE OBJECT
+	// CREATE OBJECT (For imported displacement map only)
 	// Import a Depth image instead of a 3D displacement map
 	//--------------------------------------------------------------------------
 
@@ -358,50 +338,10 @@ int main(int argc, char* argv[])
 	double maxStiffness = info.m_maxLinearStiffness / workspaceScaleFactor;
 
 	// create a virtual mesh
-	object = new cMultiMesh();
+	//object = new cMultiMesh();
 
 	// add object to world
-	world->addChild(object);
-
-	/////////////////////////////////////////////////////////////////////////
-	// PLANE 0:
-	/////////////////////////////////////////////////////////////////////////
-	const int PlaneW = 1.6;
-	const int PlaneH = 0.9;
-
-	// create a mesh
-	plane0 = new cMesh();
-
-	// create plane
-	cCreatePlane(plane0, 0.3, 0.3);
-
-	// create collision detector
-	plane0->createAABBCollisionDetector(toolRadius);
-
-	// add object to world
-	world->addChild(plane0);
-
-	// set the position of the object
-	plane0->setLocalPos(-0.8, -0.45, 0.0);
-
-	// set graphic properties
-	//plane0->m_texture = cTexture2d::create();
-	//plane0->m_texture = ;
-
-	cColorf color0;
-	color0.setBlueCadet();
-
-	for (int i = 0; i < mapRowNum; i++)
-	{
-		for (int j = 0; j < mapColNum; j++)
-		{
-			unsigned int vertexIndex0 = plane0->newVertex((-0.8 + 0.0016*j), (-0.45 + 0.0016*i), depthMat[i][j], 1.0, 0.0, 0.0, (-0.8 + 0.0016*j), (-0.45 + 0.0016*i), depthMat[i][j]);
-
-			// define vertex color			
-			plane0->m_vertices->setColor(vertexIndex0, color0);
-	
-		}
-	}
+	//world->addChild(object);
 
 	//Original method in 10/13/2015 : Import a 3D displacement map (object)
 	//fileload = object->loadFromFile("../bin/resources/model/displacement_map.obj"); 
@@ -411,35 +351,144 @@ int main(int argc, char* argv[])
 	//object->setUseCulling(false);
 
 	// get dimensions of object
-	object->computeBoundaryBox(true);
-	double size = cSub(object->getBoundaryMax(), object->getBoundaryMin()).length();
+	//object->computeBoundaryBox(true);
+	//double size = cSub(object->getBoundaryMax(), object->getBoundaryMin()).length();
 
-	// resize object to screen
-	if (size > 0.001)
+	//// resize object to screen
+	//if (size > 0.001)
+	//{
+	//	object->scale(1.0 / size);
+	//}
+
+	//// compute a boundary box
+	//object->computeBoundaryBox(true);
+
+	//// show/hide bounding box
+	//object->setShowBoundaryBox(false);
+
+	//// compute collision detection algorithm
+	//object->createAABBCollisionDetector(toolRadius);
+
+	//// define a default stiffness for the object
+	//object->setStiffness(0.2 * maxStiffness, true);
+
+	//// define some haptic friction properties
+	//object->setFriction(0.1, 0.2, true);
+
+	//// enable display list for faster graphic rendering
+	//object->setUseDisplayList(true);
+
+	//// center object in scene
+	//object->setLocalPos(-1.0 * object->getBoundaryCenter());
+
+	/////////////////////////////////////////////////////////////////////////
+	// Mesh object:
+	/////////////////////////////////////////////////////////////////////////
+
+	// create a virtual mesh
+    object = new cMesh();
+
+    // add object to world
+    world->addChild(object);
+
+    // set the position of the object at the center of the world
+    object->setLocalPos(0.0, 0.0, 0.0);
+
+    // Since we want to see our polygons from both sides, we disable culling.
+    object->setUseCulling(false);
+
+    // set color properties
+    object->m_material->setBlueCornflower();
+
+    // set stiffness
+    object->m_material->setStiffness(0);
+
+    // enable haptic shading
+    object->m_material->setUseHapticShading(true);
+
+    // use display list to increase graphical rendering performance
+    object->setUseDisplayList(true);
+
+	//================================================================================================
+
+	// get the size of the image
+	int sizeX = imageSize[1];
+	int sizeY = imageSize[0];
+
+	// we look for the largest side
+	int largestSide = cMax(sizeX, sizeY);
+
+	// scale the image to fit the world
+	double scale = 1.0 / (double)largestSide;
+
+	// we will create an triangle based object. For centering puposes we
+	// compute an offset for axis X and Y corresponding to the half size
+	// of the image map.
+	double offsetX = 0.5 * (double)sizeX * scale;
+	double offsetY = 0.5 * (double)sizeY * scale;
+
+	// allocate vertices for this map
+	object->m_vertices->newVertices(sizeX*sizeY);
+
+	// set position of each vertex
+	int x, y, index;
+	index = 0;
+	for (y = 0; y<sizeY; y++)
 	{
-		object->scale(1.0 / size);
+		for (x = 0; x<sizeX; x++)
+		{
+			// compute the position of the vertex
+			double px = scale * (double)x - offsetX;
+			double py = scale * (double)y - offsetY;
+
+			// set vertex position
+			//object->m_vertices->setLocalPos(index, px, py, depthMatrix[y][x]);
+			object->m_vertices->setLocalPos(index, -depthMatrix[y][x], px, py);
+			index++;
+		}
 	}
 
-	// compute a boundary box
+	// Create a triangle based map using the above pixels
+	for (x = 0; x<(sizeX - 1); x++)
+	{
+		for (y = 0; y<(sizeY - 1); y++)
+		{
+			// get the indexing numbers of the next four vertices
+			unsigned int index00 = ((y + 0) * sizeX) + (x + 0);
+			unsigned int index01 = ((y + 0) * sizeX) + (x + 1);
+			unsigned int index10 = ((y + 1) * sizeX) + (x + 0);
+			unsigned int index11 = ((y + 1) * sizeX) + (x + 1);
+
+			// create two new triangles
+			object->newTriangle(index00, index01, index10);
+			object->newTriangle(index10, index01, index11);
+		}
+	}
+
+	// compute normals
+	object->computeAllNormals();
+
+	// compute bounding box
+	object->computeBoundaryBox(true);
+	cVector3d min = object->getBoundaryMin();
+	cVector3d max = object->getBoundaryMax();
+
+	// compute size of object (largest side)
+	cVector3d span = cSub(max, min);
+	double size = cMax(span.x(), cMax(span.y(), span.z()));
+
+	// scale object
+	const double DESIRED_MESH_SIZE = 2.0;
+	double scaleFactor = DESIRED_MESH_SIZE / size;
+	object->scale(scaleFactor);
+
+	// compute boundary box again
 	object->computeBoundaryBox(true);
 
-	// show/hide bounding box
-	object->setShowBoundaryBox(false);
+	// create collision detector for haptics interaction
+	//object->createAABBCollisionDetector(1.01 * hapticRadius);
 
-	// compute collision detection algorithm
-	object->createAABBCollisionDetector(toolRadius);
-
-	// define a default stiffness for the object
-	object->setStiffness(0.2 * maxStiffness, true);
-
-	// define some haptic friction properties
-	object->setFriction(0.1, 0.2, true);
-
-	// enable display list for faster graphic rendering
-	object->setUseDisplayList(true);
-
-	// center object in scene
-	object->setLocalPos(-1.0 * object->getBoundaryCenter());
+	//==============================================================================================
 
     //--------------------------------------------------------------------------
     // WIDGETS
@@ -651,3 +700,54 @@ void updateHaptics(void)
 }
 
 //------------------------------------------------------------------------------
+
+int loadImage(string imgPath, int* imgSize, float depthMat[][IMAGE_WIDTH])
+{
+	//--------------------------------------------------------------------------
+	// LOAD FILE [11/13/2015 - present]
+	//--------------------------------------------------------------------------
+
+
+	// create a new image
+	depthImage = new cImage(windowW, windowH, GL_RGB, GL_UNSIGNED_INT);
+
+	// import the depth image from a .png file
+	fileload = depthImage->loadFromFile(imgPath);
+	if (!fileload)
+	{
+		cout << "Error - Image failed to load correctly." << endl;
+		close();
+		return (-1); // Successful
+	}
+
+	//--------------------------------------------------------------------------
+	// Read depth value from each pixel of the depth image [11/13/2015 - present]
+	//--------------------------------------------------------------------------
+	// check whether the command is succefully executed
+	bool isRight;
+	//int dpVal[4];
+
+	// depth map row (Height) and column (Width) length
+	imgSize[0] = depthImage->getHeight(); // map Row Num
+	imgSize[1] = depthImage->getWidth(); // map Col Num
+
+	for (int i = 0; i < imgSize[0]; i++)
+	{
+		for (int j = 0; j < imgSize[1]; j++)
+		{
+			isRight = depthImage->getPixelColor(j, i, depthValue);
+
+			if (isRight == false)
+			{
+				cout << "error - failed! [" + to_string(i) + "," + to_string(j) + "]" << endl;
+			}
+
+			// For gray scale image, R = G = B = GrayScale
+			depthMat[i][j] = depthValue.m_color[0]; // Extract R Value as depth information
+
+			depthMat[i][j] = depthMat[i][j] / 255;	// Normalize the depth image to [0 , 1] scale
+		}
+	}
+
+	return (0); // Successful
+}
