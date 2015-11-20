@@ -12,11 +12,10 @@
 
 //------------------------------------------------------------------------------
 #include "chai3d.h"
-#include "cMultiMesh.h" // Header file for this program
-//#include <iostream>
-//#include <fstream>
-//#include "png.h" // use libpng to load png image?
-//#include <cstdio> // use libpng to load png image?
+#include "mappingAlgorithm.h" // Header file for algorithm
+//#include <iostream> // For test only
+//#include <fstream> // For test only
+//#include "png.h" //#include <cstdio> // use libpng to load png image?
 //------------------------------------------------------------------------------
 using namespace chai3d;
 using namespace std;
@@ -81,12 +80,7 @@ cLabel* labelHapticRate;
 // a virtual tool representing the haptic device in the scene
 cToolCursor* tool;
 
-/*10/13/2015-Add 3D object to display depth map as displacement map*/
-//cMultiMesh* object;
-cMesh* object; // Mesh object? 11/19/2015
-
-/*11/13/2015 a mesh object for debbuging*/
-cMesh* plane0;
+cMesh* object; // Mesh object 11/19/2015
 
 /*11/13/2015 a depth image*/
 cImage* depthImage;
@@ -207,7 +201,11 @@ int main(int argc, char* argv[])
 	string imagePath = "../bin/resources/image/rabbit.png";
 	int imageSize[2];
 
-	loadImage(imagePath, imageSize, depthMatrix); // Load the depth matrix into an 2D array
+	// Load the depth matrix into an 2D array
+	loadImage(imagePath, imageSize, depthMatrix); 
+
+	// Apply algorithm to the depth map
+	depthIntensity(0.5, depthMatrix);
 
 	// =================== for test only : write data to .txt file (11/19/2015)
 	//ofstream outFile;
@@ -307,8 +305,14 @@ int main(int argc, char* argv[])
 	// connect the haptic device to the virtual tool
 	tool->setHapticDevice(hapticDevice);
 
-	// define the radius of the tool (sphere)
+	// define the radius of the collision dectection ==============================
+	double hapticRadius = 0.005;
+
+	// define the radius of the tool (displayed sphere)	===========================
 	double toolRadius = 0.005;
+
+	// define the stiffness of the contact object =================================
+	double stiffnessScale = 0.2;
 
 	// define a radius for the tool
 	tool->setRadius(toolRadius);
@@ -325,10 +329,9 @@ int main(int argc, char* argv[])
 	// start the haptic tool
 	tool->start();
 
-	//--------------------------------------------------------------------------
-	// CREATE OBJECT (For imported displacement map only)
-	// Import a Depth image instead of a 3D displacement map
-	//--------------------------------------------------------------------------
+	/////////////////////////////////////////////////////////////////////////
+	// Mesh object:
+	/////////////////////////////////////////////////////////////////////////
 
 	// read the scale factor between the physical workspace of the haptic
 	// device and the virtual workspace defined for the tool
@@ -336,54 +339,6 @@ int main(int argc, char* argv[])
 
 	// stiffness properties
 	double maxStiffness = info.m_maxLinearStiffness / workspaceScaleFactor;
-
-	// create a virtual mesh
-	//object = new cMultiMesh();
-
-	// add object to world
-	//world->addChild(object);
-
-	//Original method in 10/13/2015 : Import a 3D displacement map (object)
-	//fileload = object->loadFromFile("../bin/resources/model/displacement_map.obj"); 
-	//(x-up,z-forward output)
-
-	// disable culling so that faces are rendered on both sides
-	//object->setUseCulling(false);
-
-	// get dimensions of object
-	//object->computeBoundaryBox(true);
-	//double size = cSub(object->getBoundaryMax(), object->getBoundaryMin()).length();
-
-	//// resize object to screen
-	//if (size > 0.001)
-	//{
-	//	object->scale(1.0 / size);
-	//}
-
-	//// compute a boundary box
-	//object->computeBoundaryBox(true);
-
-	//// show/hide bounding box
-	//object->setShowBoundaryBox(false);
-
-	//// compute collision detection algorithm
-	//object->createAABBCollisionDetector(toolRadius);
-
-	//// define a default stiffness for the object
-	//object->setStiffness(0.2 * maxStiffness, true);
-
-	//// define some haptic friction properties
-	//object->setFriction(0.1, 0.2, true);
-
-	//// enable display list for faster graphic rendering
-	//object->setUseDisplayList(true);
-
-	//// center object in scene
-	//object->setLocalPos(-1.0 * object->getBoundaryCenter());
-
-	/////////////////////////////////////////////////////////////////////////
-	// Mesh object:
-	/////////////////////////////////////////////////////////////////////////
 
 	// create a virtual mesh
     object = new cMesh();
@@ -401,7 +356,7 @@ int main(int argc, char* argv[])
     object->m_material->setBlueCornflower();
 
     // set stiffness
-    object->m_material->setStiffness(0);
+	object->m_material->setStiffness(stiffnessScale*maxStiffness);
 
     // enable haptic shading
     object->m_material->setUseHapticShading(true);
@@ -486,7 +441,7 @@ int main(int argc, char* argv[])
 	object->computeBoundaryBox(true);
 
 	// create collision detector for haptics interaction
-	//object->createAABBCollisionDetector(1.01 * hapticRadius);
+	object->createAABBCollisionDetector(1.01 * hapticRadius);
 
 	//==============================================================================================
 

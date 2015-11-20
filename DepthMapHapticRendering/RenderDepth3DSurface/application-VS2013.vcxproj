@@ -20,9 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main_cMultiMesh.cpp" />
+    <ClCompile Include="mappingAlgorithm.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cMultiMesh.h" />
+    <ClInclude Include="mappingAlgorithm.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>renderDepthArray</ProjectName>
