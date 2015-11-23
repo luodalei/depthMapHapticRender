@@ -7,6 +7,10 @@ All the tone-mapping algorithms (as functions) are included in this file.
 */
 //==============================================================================
 
+#include <string>
+//------------------------------------------------------------------------------
+using namespace std;
+
 //------------------------------------------------------------------------------
 // MARCO
 //------------------------------------------------------------------------------
@@ -27,4 +31,13 @@ All the tone-mapping algorithms (as functions) are included in this file.
 //------------------------------------------------------------------------------
 
 // Algorithm 1 : Adjust depth intensity
-int depthIntensity(float intenSacle, float depthMat[][IMAGE_WIDTH]);
+double** gaussian(double intenSacle, double** depthMat, int radius, int sigma);
+
+//------------------------------------------------------------------------------
+// ASSISTIVE FUNCTIONS
+//------------------------------------------------------------------------------
+/* Import the original depth map image */
+void readMatrix(double** mat, int width, int height, string filepath);
+
+/* Export the mapped image to a .txt file */
+void writeMatrix(double** mat, int width, int height, string filename);

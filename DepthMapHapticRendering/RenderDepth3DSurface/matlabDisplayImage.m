@@ -7,7 +7,9 @@
 IMAGE_WIDTH = 960;
 IMAGE_HEIGHT =540;
 
-fileID = fopen('Map.txt');
+% fileID = fopen('Map.txt');
+fileID = fopen('modifedMap.txt');
+
 dataStream = textscan(fileID,repmat('%f',1,IMAGE_WIDTH));
 fclose(fileID);
 
@@ -20,9 +22,10 @@ for i = 1:IMAGE_HEIGHT
 end
 
 %%
-figure('Position',[400,200,IMAGE_WIDTH,IMAGE_HEIGHT-20])
+figure('Position',[400,200,IMAGE_WIDTH,IMAGE_HEIGHT-26])
 surf(depthMatrix,'EdgeColor','none');
 view(2);
 xlim([0 IMAGE_WIDTH]);
 ylim([0 IMAGE_HEIGHT]);
 axis equal
+colorbar

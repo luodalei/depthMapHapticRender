@@ -13,8 +13,8 @@
 //------------------------------------------------------------------------------
 #include "chai3d.h"
 #include "mappingAlgorithm.h" // Header file for algorithm
-//#include <iostream> // For test only
-//#include <fstream> // For test only
+#include <iostream> // For test only
+#include <fstream> // For test only
 //#include "png.h" //#include <cstdio> // use libpng to load png image?
 //------------------------------------------------------------------------------
 using namespace chai3d;
@@ -108,8 +108,8 @@ int windowH;
 int windowPosX;
 int windowPosY;
 
-/*11/13/2015 an matrix containing depth values*/
-float depthMatrix[IMAGE_HEIGHT][IMAGE_WIDTH];
+/* an matrix containing depth values (11/22/2015) */
+double** depthMatrix = 0;
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -134,7 +134,7 @@ void close(void);
 void updateHaptics(void);
 
 // Load image to an 2D array 
-int loadImage(string imgPath, int* imgSize, float depthMat[][IMAGE_WIDTH]);
+int loadImage(string imgPath, int* imgSize, double** depthMat);
 
 int main(int argc, char* argv[])
 {
@@ -198,27 +198,32 @@ int main(int argc, char* argv[])
     }
 
 	//=====================================================================================================
-	string imagePath = "../bin/resources/image/rabbit.png";
+	// Depth map matirx initialization
+	depthMatrix = new double*[IMAGE_HEIGHT];
+	for (int i = 0; i < IMAGE_HEIGHT; i++)
+	{
+		depthMatrix[i] = new double[IMAGE_WIDTH];
+	}
+
+	// Importing image 
+	string imagePath0 = "../bin/resources/image/rabbit.png"; 
+	string imagePath1 = "../bin/resources/image/complexScene1.png";
+	string imagePath2 = "../bin/resources/image/ol_dm1.png";
+	string imagePath3 = "../bin/resources/image/ol_dm2.png";
 	int imageSize[2];
 
 	// Load the depth matrix into an 2D array
-	loadImage(imagePath, imageSize, depthMatrix); 
+	loadImage(imagePath1, imageSize, depthMatrix);
 
 	// Apply algorithm to the depth map
-	depthIntensity(0.5, depthMatrix);
+	// construct Kernel
+	int radius = 10;
+	int sigma = 20;
+
+	double** mappedMatrix = gaussian(0.5, depthMatrix, radius, sigma);
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	//ofstream outFile;
-	//outFile.open("Map.txt");
-	//for (int i = 0; i < IMAGE_HEIGHT; i++)
-	//{
-	//	for (int j = 0; j < IMAGE_WIDTH; j++)
-	//	{
-	//		outFile << depthMatrix[i][j] << " ";
-	//	}
-	//	outFile << endl;
-	//}
-	//outFile.close();
+	writeMatrix(mappedMatrix, IMAGE_WIDTH, IMAGE_HEIGHT, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
@@ -397,8 +402,7 @@ int main(int argc, char* argv[])
 			double py = scale * (double)y - offsetY;
 
 			// set vertex position
-			//object->m_vertices->setLocalPos(index, px, py, depthMatrix[y][x]);
-			object->m_vertices->setLocalPos(index, -depthMatrix[y][x], px, py);
+			object->m_vertices->setLocalPos(index, -mappedMatrix[y][x], px, py);
 			index++;
 		}
 	}
@@ -656,7 +660,7 @@ void updateHaptics(void)
 
 //------------------------------------------------------------------------------
 
-int loadImage(string imgPath, int* imgSize, float depthMat[][IMAGE_WIDTH])
+int loadImage(string imgPath, int* imgSize, double** depthMat)
 {
 	//--------------------------------------------------------------------------
 	// LOAD FILE [11/13/2015 - present]
