@@ -2,11 +2,14 @@
 /*
     \author    Yitian Shao
 	\templete from <http://www.chai3d.org>
-	\created 10/13/2015 
-
+	\created 10/13/2015 v1.00
 	This is the second step on realizing depth map haptic rendering.
 	The goal here is to import a depth map image in format like '.png' and 
 	construct a 3D surface through a mesh. Then rendering it.
+
+	\updated 11/24/2015 v1.01
+	Include depth image processing algorithm in separate file. This file only 
+	includes 3D graphics and haptics rendering pipelines.
 */
 //==============================================================================
 
@@ -133,8 +136,11 @@ void close(void);
 // main haptics simulation loop
 void updateHaptics(void);
 
-// Load image to an 2D array 
+// load image to an 2D array 
 int loadImage(string imgPath, int* imgSize, double** depthMat);
+
+// find the depth range of a depth image
+double getDepthRange(double** depthMat);
 
 int main(int argc, char* argv[])
 {
@@ -189,7 +195,7 @@ int main(int argc, char* argv[])
     glutSetWindowTitle("Render Depth Map 3D Surface");
 	
 	//================just for test ==========================
-	//const char * imagePath = "../bin/resources/images/rabbit.tif";
+	// const char * imagePath = "../bin/resources/images/rabbit.tif";
 
     // set fullscreen mode
     if (fullscreen)
@@ -210,17 +216,20 @@ int main(int argc, char* argv[])
 	string imagePath1 = "../bin/resources/image/complexScene1.png";
 	string imagePath2 = "../bin/resources/image/ol_dm1.png";
 	string imagePath3 = "../bin/resources/image/ol_dm2.png";
+	string imagePath4 = "../bin/resources/image/ol_dm3.png";
+	string imagePath5 = "../bin/resources/image/ol_dm4.png";
 	int imageSize[2];
 
 	// Load the depth matrix into an 2D array
-	loadImage(imagePath1, imageSize, depthMatrix);
+	loadImage(imagePath5, imageSize, depthMatrix);
 
 	// Apply algorithm to the depth map
 	// construct Kernel
 	int radius = 10;
-	int sigma = 20;
+	int sigma = 10;
 
-	double** mappedMatrix = gaussian(0.5, depthMatrix, radius, sigma);
+	//double** mappedMatrix = depthMatrix; // Original 
+	double** mappedMatrix = gaussian(0.5, depthMatrix, radius, sigma); // Gaussian filter 
 
 	// =================== for test only : write data to .txt file (11/19/2015)
 	writeMatrix(mappedMatrix, IMAGE_WIDTH, IMAGE_HEIGHT, "modifedMap.txt");
@@ -243,10 +252,8 @@ int main(int argc, char* argv[])
 	world->addChild(camera);
 
 	// position and orient the camera
-	//camera->set(cVector3d(0.6, 0.0, 0),    // camera position (eye)
-	//	cVector3d(0.0, 0.0, 0.0),    // lookat position (target)
-	//	cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
-	camera->set(cVector3d(1.0, -0.175, 0.0),    // camera position (eye)
+	// Camera shift additionally by 1.0 on z direction
+	camera->set(cVector3d(1.0 + 1.4, 0.0, 0.0),    // camera position (eye) 
 		cVector3d(0.0, 0.0, 0.0),    // lookat position (target)
 		cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
 
@@ -259,7 +266,7 @@ int main(int argc, char* argv[])
 
 	// set stereo eye separation and focal length (applies only if stereo is enabled)
 	camera->setStereoEyeSeparation(0.03);
-	camera->setStereoFocalLength(1.5); //3.0?
+	camera->setStereoFocalLength(1.5); 
 
 	// enable multi-pass rendering to handle transparent objects
 	camera->setUseMultipassTransparency(true);
@@ -283,6 +290,10 @@ int main(int argc, char* argv[])
 	light->m_ambient.set(0.1, 0.1, 0.1);
 	light->m_diffuse.set(0.5, 0.5, 0.5);
 	light->m_specular.set(1.0, 1.0, 1.0);
+
+	/* Display detailed parameters of generic objects (for test only) */
+	/*cVector3d camPosi = camera->getGlobalPos();
+	cout << "camera global potion = " << camPosi.str(3) << endl;*/
 
     //--------------------------------------------------------------------------
     // HAPTIC DEVICE
@@ -317,19 +328,19 @@ int main(int argc, char* argv[])
 	double toolRadius = 0.005;
 
 	// define the stiffness of the contact object =================================
-	double stiffnessScale = 0.2;
+	double stiffnessScale = 0.5; // modified on 11/24/2015
 
 	// define a radius for the tool
 	tool->setRadius(toolRadius);
 
-	// show the device sphere. hide proxy.
-	tool->setShowContactPoints(true, false);
+	// show the (device sphere, proxy).
+	tool->setShowContactPoints(true, true);
 
 	// create a red cursor
 	tool->m_hapticPoint->m_sphereProxy->m_material->setRed();
 
-	// map the physical workspace of the haptic device to a ? virtual workspace.
-	tool->setWorkspaceRadius(1.0);
+	// defines the size of the virtual workspace covered by the haptic device
+	tool->setWorkspaceRadius(1.6); // It will be changed after constructed the mesh object?
 
 	// start the haptic tool
 	tool->start();
@@ -352,7 +363,7 @@ int main(int argc, char* argv[])
     world->addChild(object);
 
     // set the position of the object at the center of the world
-    object->setLocalPos(0.0, 0.0, 0.0);
+    object->setLocalPos(1.4, 0.0, 0.0); // Object shift by 1.0 on z direction
 
     // Since we want to see our polygons from both sides, we disable culling.
     object->setUseCulling(false);
@@ -369,23 +380,28 @@ int main(int argc, char* argv[])
     // use display list to increase graphical rendering performance
     object->setUseDisplayList(true);
 
-	//================================================================================================
+	//--------------------------------------------------------------------------
+	// Construct the mesh object
 
 	// get the size of the image
 	int sizeX = imageSize[1];
 	int sizeY = imageSize[0];
 
+	// get the depth range of the image
+	double sizeZ = getDepthRange(mappedMatrix);
+
 	// we look for the largest side
 	int largestSide = cMax(sizeX, sizeY);
 
 	// scale the image to fit the world
-	double scale = 1.0 / (double)largestSide;
+	double scaleXY = 1.0 / (double)largestSide;
+	double scaleZ = 1.0 / sizeZ;
 
 	// we will create an triangle based object. For centering puposes we
 	// compute an offset for axis X and Y corresponding to the half size
 	// of the image map.
-	double offsetX = 0.5 * (double)sizeX * scale;
-	double offsetY = 0.5 * (double)sizeY * scale;
+	double offsetX = 0.5 * (double)sizeX * scaleXY;
+	double offsetY = 0.5 * (double)sizeY * scaleXY;
 
 	// allocate vertices for this map
 	object->m_vertices->newVertices(sizeX*sizeY);
@@ -398,14 +414,15 @@ int main(int argc, char* argv[])
 		for (x = 0; x<sizeX; x++)
 		{
 			// compute the position of the vertex
-			double px = scale * (double)x - offsetX;
-			double py = scale * (double)y - offsetY;
+			double px = scaleXY * (double)x - offsetX;
+			double py = scaleXY * (double)y - offsetY;
+			double pz = -scaleZ * mappedMatrix[y][x];
 
 			// set vertex position
-			object->m_vertices->setLocalPos(index, -mappedMatrix[y][x], px, py);
+			object->m_vertices->setLocalPos(index, pz, px, py);
 			index++;
 		}
-	}
+	}	
 
 	// Create a triangle based map using the above pixels
 	for (x = 0; x<(sizeX - 1); x++)
@@ -447,7 +464,7 @@ int main(int argc, char* argv[])
 	// create collision detector for haptics interaction
 	object->createAABBCollisionDetector(1.01 * hapticRadius);
 
-	//==============================================================================================
+	//--------------------------------------------------------------------------
 
     //--------------------------------------------------------------------------
     // WIDGETS
@@ -564,7 +581,8 @@ void updateGraphics(void)
     /////////////////////////////////////////////////////////////////////
 
 	// display new position data
-	labelHapticDevicePosition->setString("position [m]: " + hapticDevicePosition.str(3));
+	//labelHapticDevicePosition->setString("position [m]: " + hapticDevicePosition.str(3)); // ?
+	labelHapticDevicePosition->setString("position [m]: " + tool->getDeviceGlobalPos().str(3));
 
     // display haptic rate data
     labelHapticRate->setString ("haptic rate: "+cStr(frequencyCounter.getFrequency(), 0) + " [Hz]");
@@ -615,8 +633,8 @@ void updateHaptics(void)
         /////////////////////////////////////////////////////////////////////
 
         // read position 
-        cVector3d position;
-        hapticDevice->getPosition(position);
+        //cVector3d position;
+        //hapticDevice->getPosition(position); // get position ?
 
         // read user-switch status (button 0)
         bool button = false;
@@ -641,7 +659,7 @@ void updateHaptics(void)
 		/////////////////////////////////////////////////////////////////////
 
 		// update global variable for graphic display update
-		hapticDevicePosition = position;
+		//hapticDevicePosition = position;
 
         /////////////////////////////////////////////////////////////////////
         // APPLY FORCES
@@ -709,4 +727,22 @@ int loadImage(string imgPath, int* imgSize, double** depthMat)
 	}
 
 	return (0); // Successful
+}
+
+double getDepthRange(double** depthMat)
+{
+	double minVal = 0.0;
+	double maxVal = 0.0;
+
+	for (int i = 0; i < IMAGE_HEIGHT; i++)
+	{
+		for (int j = 0; j < IMAGE_WIDTH; j++)
+		{
+			if (depthMat[i][j] < minVal) minVal = depthMat[i][j];
+			if (depthMat[i][j] > maxVal) maxVal = depthMat[i][j];			
+		}
+	}
+	//cout << "min = " << minVal << " , max = " << maxVal << endl; // for test only
+
+	return (maxVal - minVal);
 }

@@ -30,7 +30,7 @@ using namespace std;
 // DECLARED FUNCTIONS
 //------------------------------------------------------------------------------
 
-// Algorithm 1 : Adjust depth intensity
+// Algorithm 1 : Adjust depth intensity and apply Gaussian filter
 double** gaussian(double intenSacle, double** depthMat, int radius, int sigma);
 
 //------------------------------------------------------------------------------

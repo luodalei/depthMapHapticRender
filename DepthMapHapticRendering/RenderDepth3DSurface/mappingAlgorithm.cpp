@@ -99,12 +99,14 @@ void writeMatrix(double** mat, int width, int height, string filename)
 double** filter(double** mat, double** ker)
 {
 	int radius = sizeof(ker);
-	double filtSum;
+	int kerLen = 2 * radius + 1;
+	double deftWeightSum = 0; // default sum of kernel weight
 
 	double** mappedMat = 0;
 	mappedMat = new double*[IMAGE_HEIGHT];
 
-	for (int i = 0; i < IMAGE_HEIGHT; i++)
+	// initialize an empty mapped matrix
+	for (int i = 0; i < IMAGE_HEIGHT; i++) 
 	{
 		mappedMat[i] = new double[IMAGE_WIDTH];
 		for (int j = 0; j < IMAGE_WIDTH; j++)
@@ -113,21 +115,52 @@ double** filter(double** mat, double** ker)
 		}
 	}
 
-	// Apply filter
-	for (int i = radius; i < (IMAGE_HEIGHT - radius); i++)
+	for (int p = 0; p < kerLen; p++)
 	{
-		for (int j = radius; j < (IMAGE_WIDTH - radius); j++)
+		for (int q = 0; q < kerLen; q++)
 		{
-			filtSum = 0;
-			for (int m = -radius; m < radius; m++)
+			deftWeightSum += ker[p][q];
+		}
+	}
+
+	// Apply filter
+	for (int i = 0; i < IMAGE_HEIGHT; i++)
+	{
+		for (int j = 0; j < IMAGE_WIDTH; j++)
+		{
+			int mInit = -radius;
+			int mEnd = radius;
+			int nInit = -radius;
+			int nEnd = radius;
+			double weightSum = 0; // current sum of kernel weight
+
+			// if filter block exceed image boundary then truncate filter block
+			if (i < radius){ mInit = -i; }
+			if (i >= (IMAGE_HEIGHT - radius)){ mEnd = IMAGE_HEIGHT - i; }
+			if (j < radius){ nInit = -j; }
+			if (j >= (IMAGE_WIDTH - radius)){ nEnd = IMAGE_WIDTH - j; }		
+
+			double filtSum = 0;
+
+			for (int m = mInit; m < mEnd; m++)
 			{
-				for (int n = -radius; n < radius; n++)
+				for (int n = nInit; n < nEnd; n++)
 				{
-					filtSum += mat[i + m][j + n] * ker[m + radius][n + radius]; // Gaussian Filter
-					//filtSum += depthMatrix[i + m][j + n]; // Average Filter
+					// Average filter
+					filtSum += mat[i + m][j + n] * ker[m + radius][n + radius];
+					weightSum += ker[m + radius][n + radius];
 				}
 			}
-			mappedMat[i][j] = filtSum;
+	
+			if (weightSum < deftWeightSum) 
+			{
+				// In case of kernel block being truncated
+				mappedMat[i][j] = filtSum * deftWeightSum / weightSum;
+			}
+			else 
+			{
+				mappedMat[i][j] = filtSum;
+			}
 		}
 	}
 
@@ -161,7 +194,7 @@ double** gaussianKernel(int radius, int sigma)
 		{
 			ker[i][j] /= kerSum;
 			ker[i][j] = floor(ker[i][j] * 1000000.0) / 1000000.0;
-			//cout << ker[i][j] << " ";
+			//cout << ker[i][j] << " "; // for test only
 		}
 		cout << endl;
 	}
