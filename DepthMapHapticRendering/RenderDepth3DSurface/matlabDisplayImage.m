@@ -9,6 +9,8 @@ IMAGE_HEIGHT =540;
 
 % fileID = fopen('originalMap.txt');
 fileID = fopen('modifedMap.txt');
+% fileID = fopen('diffX.txt');
+% fileID = fopen('diffY.txt');
 
 dataStream = textscan(fileID,repmat('%f',1,IMAGE_WIDTH));
 fclose(fileID);

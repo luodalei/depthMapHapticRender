@@ -226,16 +226,20 @@ int main(int argc, char* argv[])
 	///////////////////////////////////////////////////////////////////////////
 
 	// 1. Gaussian filtering
-	uint radius = 10;
-	int sigma = 4;
-	mappedMatrix = gaussian(0.5, *depthMatrix, radius, sigma); // Gaussian filter 
+	//uint radius = 5;
+	//int sigma = 4;
+	//mappedMatrix = gaussian(0.5, *depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. gradient
+	uint radius2 = 3;
+	mappedMatrix = matrixDiff(*depthMatrix, radius2);
+
+
 	// test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
 	// writeMatrix(depthMatrix, "originalMap.txt");
-	writeMatrix(mappedMatrix, "modifedMap.txt");
+	 writeMatrix(mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
@@ -725,10 +729,10 @@ int loadImage(string imgPath, uint* imgSize, MMatrix* depthMat)
 
 			// For gray scale image, R = G = B = GrayScale
 			depthMat->setElement(i, j, depthValue.m_color[0]); // Extract R Value as depth information
-
-			depthMat->setElement(i, j, depthMat->getElement(i, j) / 255 ); // Normalize the depth image to [0 , 1] scale // Update needed !!!
 		}
 	}
+
+	depthMat->div(255.0); // Normalize the depth image to [0 , 1] scale
 
 	return (0); // Successful
 }

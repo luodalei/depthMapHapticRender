@@ -33,6 +33,11 @@ All the tone-mapping algorithms (as functions) are included in this file.
 // Algorithm 1 : Adjust depth intensity and apply Gaussian filter
 MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma);
 
+
+// Algorithm 2 : Bas-Relief -> Gradient compression
+// Edge detection (matrix differentiation)
+MMatrix* matrixDiff(MMatrix depthMat, uint radius);
+
 //------------------------------------------------------------------------------
 // ASSISTIVE FUNCTIONS
 //------------------------------------------------------------------------------

@@ -26,17 +26,17 @@ typedef std::vector< std::vector< double > > dbmatrix; // matrix of double type
 
 class MMatrix
 {
-private:
+	private:
 	// matrix with size of rowsNum $\times$ colsNum
 	size_t rowsNum; // number of rows
 	size_t colsNum; // number of columns
 
-protected:
+	protected:
 	dbmatrix mMat; // the matrix
 
-public:
+	public:
 	// Constructor : method 0 -initialize only the row vector
-	//MMatrix(size_t m); // Not functioning currently
+	//MMatrix(size_t m); // Not functioning, needed to be updated in future 
 
 	// Constructor : method 1 -initialize a matrix with m $\times$ n capacity
 	MMatrix(size_t m, size_t n);
@@ -45,7 +45,7 @@ public:
 	MMatrix(size_t m, size_t n, double initVal);
 
 	// Constructor : method 3 -convert an existing 2D array to matrix
-	//MMatrix(double** mat);
+	//MMatrix(double** mat);  needed to be updated in future 
 
 	// Destructor
 	~MMatrix();
@@ -64,7 +64,7 @@ public:
 	// get value of element at i, j
 	double getElement(uint i, uint j);
 
-	//------------------------------------------------------------------
+	//------------------------------------------------------------------ =
 	// Matrix operation: assignment (=) 
 	// Matrix dimension may subject to change
 	MMatrix& operator= (const MMatrix& assigned);
@@ -72,27 +72,58 @@ public:
 	// Matrix operation: equal to (==)
 	bool operator== (const MMatrix& compared);
 
+	//------------------------------------------------------------------ >
+	// Matrix operation: element-wise greater than (>)
+	MMatrix operator>(const MMatrix& compared);
+
+	// Matrix operation: greater than threshold (>)
+	MMatrix isGreator(double thres);
+
+	//------------------------------------------------------------------ +
 	// Matrix operation: add (+=)
 	MMatrix& operator+= (const MMatrix& added);
 
+	// Matrix operation: added by single number
+	void add(double added);
+
+	//------------------------------------------------------------------ -
 	// Matrix operation: subtract (-=)
 	MMatrix& operator-= (const MMatrix& subtracted);
 
+	// Matrix operation: subtracted by single number
+	void sub(double subtracted);
+
+	//------------------------------------------------------------------ *
 	// Matrix operation: element-wise multiplication (.*)
 	MMatrix& operator*=(const MMatrix& multiplied);
+
+	// Matrix operation: multiplied by single number
+	void mul(double multiplied);
 
 	// Matrix operation: inner product (*) 
 	MMatrix operator* (const MMatrix& multiplied);
 
+	//------------------------------------------------------------------ /
 	// Matrix operation: element-wise divide (./)
-	MMatrix& operator/=(const MMatrix& divided);
+	MMatrix& operator/=(const MMatrix& divided); // divided by a matrix
 
+	// Matrix operation: divided by single number
+	void div(double divided);
+
+	//------------------------------------------------------------------ T
 	// Matrix operation: transform (')
 	MMatrix operator~();
 
+	//------------------------------------------------------------------ :
 	// Matrix operation: truncation
 	MMatrix truncate(int row0, int row1, int col0, int col1);
+
 	//------------------------------------------------------------------
+	// Matrix operation: maximum value of whole matrix
+	double max();
+
+	// Matrix operation: minimum value of whole matrix
+	double min();
 
 	//  Display matrix in console (unsuitable for large matrix)
 	void display();
@@ -106,7 +137,7 @@ class MVector : public MMatrix
 {
 public:
 	// Constructor : method 0 - initialize an empty vector
-	MVector();
+	//MVector();  needed to be updated in future 
 
 	// Constructor : method 1 -initialize a matrix with n capacity
 	MVector(size_t n);
@@ -115,7 +146,7 @@ public:
 	MVector(size_t n, double initVal);
 
 	// Constructor : method 3 -convert an existing array to vector
-	MVector(double* arr);
+	//MVector(double* arr);  needed to be updated in future 
 
 	// Destructor
 	~MVector();

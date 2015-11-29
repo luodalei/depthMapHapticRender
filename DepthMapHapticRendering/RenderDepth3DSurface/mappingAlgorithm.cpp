@@ -30,6 +30,9 @@ MMatrix gaussianKernel(uint radius, int sigma);
 /* Construct sobel filter kernel block */
 MMatrix sobelKernel(size_t winSize);
 
+/* Threshold filter */
+MMatrix* threshold(MMatrix depthMat, double thres);
+
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,16 +44,7 @@ MMatrix sobelKernel(size_t winSize);
 
 MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma)
 {
-	size_t height = depthMat.getRowsNum();
-	size_t width = depthMat.getColsNum();
-
-	for (uint i = 0; i < height; i++)
-	{
-		for (uint j = 0; j < width; j++)
-		{
-			depthMat.setElement(i, j, depthMat.getElement(i, j) * intenSacle);
-		}
-	}
+	depthMat.mul(intenSacle);
 
 	MMatrix kernel = gaussianKernel(radius, sigma);
 
@@ -65,9 +59,27 @@ MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma)
 // ACM Transactions on Graphics(TOG).Vol. 26. No. 3. ACM, 2007.
 ///////////////////////////////////////////////////////////////////////////////
 
-MMatrix gradient(double intenSacle, MMatrix depthMat, int radius)
+// Edge detection (matrix differentiation)
+MMatrix* matrixDiff(MMatrix depthMat, uint radius)
 {
-	MMatrix retMat(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
+	MMatrix kernel = sobelKernel(2*radius+1);
+
+	kernel.display();
+
+	MMatrix* diffX = filter(depthMat, kernel);
+
+	//writeMatrix(diffX, "diffX.txt"); // For test only
+
+	MMatrix* diffY = filter(depthMat, (~kernel));
+
+	//writeMatrix(diffY, "diffY.txt"); // For test only
+
+	(*diffX) *= (*diffX); // x direction magnitude
+	(*diffY) *= (*diffY); // y direction magnitude
+
+	(*diffX) += (*diffY); // $x^2 + y^2$
+
+	MMatrix* retMat = threshold(*diffX, 0.015);
 
 	return retMat;
 }
@@ -123,12 +135,15 @@ void writeMatrix(MMatrix* mat, string filename)
 /* Apply filter to input data matrix */
 MMatrix* filter(MMatrix mat, MMatrix ker)
 {
+	size_t height = mat.getRowsNum();
+	size_t width = mat.getColsNum();
+
 	size_t kerLen = ker.getRowsNum();
 	int radius = (kerLen - 1) / 2;
 	
 	double deftWeightSum = 0; // default sum of kernel weight
 
-	MMatrix* mappedMat = new MMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
+	MMatrix* mappedMat = new MMatrix(height, width, 0.0);
 
 	for (uint p = 0; p < kerLen; p++)
 	{
@@ -139,9 +154,9 @@ MMatrix* filter(MMatrix mat, MMatrix ker)
 	}
 
 	// Apply filter
-	for (uint i = 0; i < IMAGE_HEIGHT; i++)
+	for (int i = 0; i < height; i++)
 	{
-		for (uint j = 0; j < IMAGE_WIDTH; j++)
+		for (int j = 0; j < width; j++)
 		{
 			int mInit = -radius;
 			int mEnd = radius;
@@ -151,9 +166,9 @@ MMatrix* filter(MMatrix mat, MMatrix ker)
 
 			// if filter block exceed image boundary then truncate filter block
 			if (i < radius){ mInit = -i; }
-			if (i >= (IMAGE_HEIGHT - radius)){ mEnd = IMAGE_HEIGHT - i; }
+			if (i >= (height - radius)){ mEnd = height - i; }
 			if (j < radius){ nInit = -j; }
-			if (j >= (IMAGE_WIDTH - radius)){ nEnd = IMAGE_WIDTH - j; }		
+			if (j >= (width - radius)){ nEnd = width - j; }
 
 			double filtSum = 0;
 
@@ -201,21 +216,26 @@ MMatrix gaussianKernel(uint radius, int sigma)
 		//ker[i] = new double[kerLen];
 		for (int j = 0; j < kerLen; j++)
 		{
-			// kernel weight = e^{ -( ((i- \mu)^2+(j-\mu)^2) )/( 2* \sigma^2 )}
+			// The formula: kernel weight = e^{ -( ((i- \mu)^2+(j-\mu)^2) )/( 2* \sigma^2 )}
 			ker.setElement(i, j, (exp(-((i - mu)*(i - mu) + (j - mu)*(j - mu)) / sigma2)) );
+
 			kerSum += ker.getElement(i, j);
 		}
 	}
+
+	ker.div(kerSum);
+
 	for (uint i = 0; i < kerLen; i++)
 	{
 		for (uint j = 0; j < kerLen; j++)
 		{
-			ker.setElement(i, j, (ker.getElement(i, j) / kerSum)); // Update needed in the future !!!
 			ker.setElement(i, j,  (floor(ker.getElement(i, j) * 1000000.0) / 1000000.0) );
 			//cout << ker[i][j] << " "; // for test only
 		}
 		cout << endl;
 	}
+
+	//ker.display(); // For test only
 	return ker;
 }
 
@@ -232,6 +252,24 @@ MMatrix sobelKernel(size_t winSize)
 	MMatrix ker = (~smoothOperator) * diffOperator;
 
 	return ker;
+}
+
+/* Threshold filter */
+MMatrix* threshold(MMatrix depthMat, double thres)
+{
+	MMatrix* retMat = new MMatrix(depthMat.getRowsNum(), depthMat.getColsNum(), 0.0);
+
+	double offset = depthMat.min();
+
+	double range = depthMat.max() - offset;
+
+	// Normalization of the matrix
+	depthMat.sub(offset); // minus minimum value
+	depthMat.div(range); // divided by range
+
+	*retMat = depthMat.isGreator(thres);
+
+	return retMat;
 }
 
 
