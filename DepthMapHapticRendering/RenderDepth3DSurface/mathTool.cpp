@@ -82,6 +82,9 @@ class MMatrix
 		// Matrix operation: add (+=)
 		MMatrix& operator+= (const MMatrix& added);
 
+		// Matrix operation: add (+)
+		MMatrix operator+(const MMatrix& added);
+
 		// Matrix operation: added by single number
 		void add(double added);
 
@@ -89,12 +92,18 @@ class MMatrix
 		// Matrix operation: subtract (-=)
 		MMatrix& operator-= (const MMatrix& subtracted);
 
+		// Matrix operation: subtract (-)
+		MMatrix operator-(const MMatrix& subtracted);
+
 		// Matrix operation: subtracted by single number
 		void sub(double subtracted);
 
 		//------------------------------------------------------------------ *
-		// Matrix operation: element-wise multiplication (.*)
+		// Matrix operation: element-wise multiplication (.*=)
 		MMatrix& operator*=(const MMatrix& multiplied);
+
+		// Matrix operation: element-wise multiplication (.*)
+		MMatrix times(const MMatrix& multiplied);
 
 		// Matrix operation: multiplied by single number
 		void mul(double multiplied);
@@ -106,12 +115,23 @@ class MMatrix
 		// Matrix operation: element-wise divide (./)
 		MMatrix& operator/=(const MMatrix& divided); // divided by a matrix
 
+		// Matrix operation: element-wise divide (/)
+		MMatrix operator/(const MMatrix& divided);
+
 		// Matrix operation: divided by single number
 		void div(double divided); 
 
+		//------------------------------------------------------------------ e
+		// Matrix operation: logarithm
+		void loga(double base);
+
+		//------------------------------------------------------------------ r
+		// Matrix operation: square root
+		void sqroot(void);
+
 		//------------------------------------------------------------------ T
 		// Matrix operation: transform (')
-		MMatrix operator~();
+		MMatrix operator~(void);
 
 		//------------------------------------------------------------------ :
 		// Matrix operation: truncation
@@ -119,13 +139,13 @@ class MMatrix
 
 		//------------------------------------------------------------------
 		// Matrix operation: maximum value of whole matrix
-		double max();
+		double max(void);
 
 		// Matrix operation: minimum value of whole matrix
-		double min();
+		double min(void);
 
 		//  Display matrix in console (unsuitable for large matrix)
-		void display();
+		void display(void);
 };
 
 // Constructor : method 0 // Not functioning, needed to be updated in future 
@@ -306,6 +326,22 @@ MMatrix& MMatrix:: operator+= (const MMatrix& added)
 	return (*this);
 }
 
+// Matrix operation: add (two matrix)
+MMatrix MMatrix:: operator+(const MMatrix& added)
+{
+	// Initialize the resulted matrix
+	MMatrix resMat(this->rowsNum, this->colsNum, 0.0);
+
+	for (uint i = 0; i < this->rowsNum; i++)
+	{
+		for (uint j = 0; j < this->colsNum; j++)
+		{
+			resMat.mMat[i][j] = (this->mMat[i][j] + added.mMat[i][j]);
+		}
+	}
+	return resMat;
+}
+
 // Matrix operation: added by single number
 void MMatrix:: add(double added)
 {
@@ -331,6 +367,22 @@ MMatrix& MMatrix:: operator-= (const MMatrix& subtracted)
 	return (*this);
 }
 
+// Matrix operation: subtract (two matrix)
+MMatrix MMatrix:: operator-(const MMatrix& subtracted)
+{
+	// Initialize the resulted matrix
+	MMatrix resMat(this->rowsNum, this->colsNum, 0.0);
+
+	for (uint i = 0; i < this->rowsNum; i++)
+	{
+		for (uint j = 0; j < this->colsNum; j++)
+		{
+			resMat.mMat[i][j] = (this->mMat[i][j] - subtracted.mMat[i][j]);
+		}
+	}
+	return resMat;
+}
+
 // Matrix operation: subtracted by single number
 void MMatrix:: sub(double subtracted)
 {
@@ -354,6 +406,22 @@ MMatrix& MMatrix:: operator*=(const MMatrix& multiplied)
 		}
 	}
 	return (*this);
+}
+
+// Matrix operation: element-wise multiplication (.*)
+MMatrix MMatrix:: times(const MMatrix& multiplied)
+{
+	// Initialize the resulted matrix
+	MMatrix resMat(this->rowsNum, this->colsNum, 0.0);
+
+	for (uint i = 0; i < this->rowsNum; i++)
+	{
+		for (uint j = 0; j < this->colsNum; j++)
+		{
+			resMat.mMat[i][j] = (this->mMat[i][j] * multiplied.mMat[i][j]);
+		}
+	}
+	return resMat;
 }
 
 // Matrix operation: multiplied by single number
@@ -396,8 +464,7 @@ MMatrix MMatrix:: operator* (const MMatrix& multiplied)
 				for (uint k = 0; k < multipliedRowsNum; k++)
 				{
 					resMat.mMat[i][j] += this->mMat[i][k] * multiplied.mMat[k][j];
-				}
-				
+				}			
 			}
 		}
 		return resMat;
@@ -411,20 +478,77 @@ MMatrix& MMatrix:: operator/=(const MMatrix& divided)
 	{
 		for (uint j = 0; j < this->colsNum; j++)
 		{
-			this->mMat[i][j] /= divided.mMat[i][j];
+			if (divided.mMat[i][j] != 0) // To avoid inf
+			{
+				this->mMat[i][j] /= divided.mMat[i][j];
+			}			
 		}
 	}
 	return (*this);
 }
 
+// Matrix operation: element-wise divide (/)
+MMatrix MMatrix:: operator/(const MMatrix& divided)
+{
+	// Initialize the resulted matrix
+	MMatrix resMat(this->rowsNum, this->colsNum, 0.0);
+
+	for (uint i = 0; i < this->rowsNum; i++)
+	{
+		for (uint j = 0; j < this->colsNum; j++)
+		{
+			if (divided.mMat[i][j] != 0) // To avoid inf
+			{
+				resMat.mMat[i][j] = (this->mMat[i][j] / divided.mMat[i][j]);
+			}
+		}
+	}
+	return resMat;
+}
+
 // Matrix operation: divided by single number
 void MMatrix::div(double divided)
 {
+	if (divided == 0)
+	{
+		std::cout <<
+			"Error - cannot divided by 0"
+			<< std::endl;
+
+		exit(EXIT_FAILURE);
+	}
 	for (uint i = 0; i < this->rowsNum; i++)
 	{
 		for (uint j = 0; j < this->colsNum; j++)
 		{
 			this->mMat[i][j] /= divided;
+		}
+	}
+}
+
+// Matrix operation: logarithm
+void MMatrix::loga(double base)
+{
+	if (base == NULL)
+	{
+		for (uint i = 0; i < this->rowsNum; i++)
+		{
+			for (uint j = 0; j < this->colsNum; j++)
+			{
+				this->mMat[i][j] = log(this->mMat[i][j]);
+			}
+		}
+	}
+}
+
+// Matrix operation: square root
+void MMatrix::sqroot(void)
+{
+	for (uint i = 0; i < this->rowsNum; i++)
+	{
+		for (uint j = 0; j < this->colsNum; j++)
+		{
+			this->mMat[i][j] = sqrt(this->mMat[i][j]);
 		}
 	}
 }
@@ -569,7 +693,7 @@ class MVector : public MMatrix
 {
 	public:
 		// Constructor : method 0 - initialize an empty vector
-		MVector();
+		//MVector();
 
 		// Constructor : method 1 -initialize a matrix with n capacity
 		MVector(size_t n); 
@@ -578,7 +702,7 @@ class MVector : public MMatrix
 		MVector(size_t n, double initVal);
 
 		// Constructor : method 3 -convert an existing array to vector
-		MVector(double* arr);
+		//MVector(double* arr);
 
 		// Destructor
 		~MVector();

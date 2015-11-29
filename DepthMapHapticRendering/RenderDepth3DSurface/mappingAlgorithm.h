@@ -35,8 +35,10 @@ MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma);
 
 
 // Algorithm 2 : Bas-Relief -> Gradient compression
+MMatrix* basRelief(MMatrix depthMat, uint radius, double thres, double alpha);
+
 // Edge detection (matrix differentiation)
-MMatrix* matrixDiff(MMatrix depthMat, uint radius);
+MMatrix** matrixDiff(MMatrix depthMat, uint radius);
 
 //------------------------------------------------------------------------------
 // ASSISTIVE FUNCTIONS

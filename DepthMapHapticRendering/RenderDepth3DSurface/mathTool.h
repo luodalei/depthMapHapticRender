@@ -83,6 +83,9 @@ class MMatrix
 	// Matrix operation: add (+=)
 	MMatrix& operator+= (const MMatrix& added);
 
+	// Matrix operation: add (+)
+	MMatrix operator+(const MMatrix& added);
+
 	// Matrix operation: added by single number
 	void add(double added);
 
@@ -90,12 +93,18 @@ class MMatrix
 	// Matrix operation: subtract (-=)
 	MMatrix& operator-= (const MMatrix& subtracted);
 
+	// Matrix operation: subtract (-)
+	MMatrix operator-(const MMatrix& subtracted);
+
 	// Matrix operation: subtracted by single number
 	void sub(double subtracted);
 
 	//------------------------------------------------------------------ *
 	// Matrix operation: element-wise multiplication (.*)
 	MMatrix& operator*=(const MMatrix& multiplied);
+
+	// Matrix operation: element-wise multiplication (.*)
+	MMatrix times(const MMatrix& multiplied);
 
 	// Matrix operation: multiplied by single number
 	void mul(double multiplied);
@@ -107,12 +116,23 @@ class MMatrix
 	// Matrix operation: element-wise divide (./)
 	MMatrix& operator/=(const MMatrix& divided); // divided by a matrix
 
+	// Matrix operation: element-wise divide (/)
+	MMatrix operator/(const MMatrix& divided);
+
 	// Matrix operation: divided by single number
 	void div(double divided);
 
+	//------------------------------------------------------------------ e
+	// Matrix operation: logarithm
+	void loga(double base);
+
+	//------------------------------------------------------------------ r
+	// Matrix operation: square root
+	void sqroot(void);
+
 	//------------------------------------------------------------------ T
 	// Matrix operation: transform (')
-	MMatrix operator~();
+	MMatrix operator~(void);
 
 	//------------------------------------------------------------------ :
 	// Matrix operation: truncation
@@ -120,13 +140,13 @@ class MMatrix
 
 	//------------------------------------------------------------------
 	// Matrix operation: maximum value of whole matrix
-	double max();
+	double max(void);
 
 	// Matrix operation: minimum value of whole matrix
-	double min();
+	double min(void);
 
 	//  Display matrix in console (unsuitable for large matrix)
-	void display();
+	void display(void);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

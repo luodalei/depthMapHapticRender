@@ -33,6 +33,9 @@ MMatrix sobelKernel(size_t winSize);
 /* Threshold filter */
 MMatrix* threshold(MMatrix depthMat, double thres);
 
+/* Gradient Compression */
+void compressed(MMatrix* depthMat, double thres,  double alpha);
+
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,27 +62,54 @@ MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma)
 // ACM Transactions on Graphics(TOG).Vol. 26. No. 3. ACM, 2007.
 ///////////////////////////////////////////////////////////////////////////////
 
-// Edge detection (matrix differentiation)
-MMatrix* matrixDiff(MMatrix depthMat, uint radius)
+MMatrix* basRelief(MMatrix depthMat, uint radius, double thres, double alpha)
 {
+	// Acquire map gradient
+	MMatrix** matrixGradient = matrixDiff(depthMat, radius);
+
+	MMatrix* diffX = matrixGradient[0];
+	MMatrix* diffY = matrixGradient[1];
+	MMatrix* diffMag = matrixGradient[2];
+
+	// Gradient Compression (change only the gradient magnitude)
+	compressed(diffMag, thres, alpha);
+
+	// g' = s' $\times$ v'
+	(*diffX) *= (*diffMag); 
+	(*diffY) *= (*diffMag);
+
+	// Integration
+
+	MMatrix* retMat;
+
+	return retMat;
+}
+
+// Edge detection (matrix differentiation)
+MMatrix** matrixDiff(MMatrix depthMat, uint radius)
+{
+	MMatrix* retMat[3];
+
 	MMatrix kernel = sobelKernel(2*radius+1);
 
 	kernel.display();
 
-	MMatrix* diffX = filter(depthMat, kernel);
+	// diffX
+	retMat[0] = filter(depthMat, kernel);
 
-	//writeMatrix(diffX, "diffX.txt"); // For test only
+	// diffY
+	retMat[1] = filter(depthMat, (~kernel));
 
-	MMatrix* diffY = filter(depthMat, (~kernel));
+	MMatrix* diffMag = new MMatrix(depthMat.getRowsNum(), depthMat.getColsNum(), 0.0);
 
-	//writeMatrix(diffY, "diffY.txt"); // For test only
+	(*diffMag) = ( retMat[0]->times(*retMat[0]) ) + ( retMat[1]->times(*retMat[1]) );
+	diffMag->sqroot(); // $sqrt{ x^2 + y^2 }$
 
-	(*diffX) *= (*diffX); // x direction magnitude
-	(*diffY) *= (*diffY); // y direction magnitude
+	(*retMat[0]) /= (*diffMag); // gradient direction x
+	(*retMat[1]) /= (*diffMag); // gradient direction y
+	retMat[2] = diffMag; // gradient magnitude
 
-	(*diffX) += (*diffY); // $x^2 + y^2$
-
-	MMatrix* retMat = threshold(*diffX, 0.015);
+	//MMatrix* retMat = threshold(*diffX, 0.015); // Edge detection
 
 	return retMat;
 }
@@ -270,6 +300,26 @@ MMatrix* threshold(MMatrix depthMat, double thres)
 	*retMat = depthMat.isGreator(thres);
 
 	return retMat;
+}
+
+/* Gradient Compression */ 
+// C(x) = \frac{1}{\alpha}\times\log(1+\alpha\times x)
+void compressed(MMatrix* depthMat, double thres, double alpha)
+{
+	for (uint i = 0; i < depthMat->getRowsNum(); i++)
+	{
+		for (uint j = 0; j < depthMat->getColsNum(); j++)
+		{
+			if (depthMat->getElement(i, j) < thres) // less than threshold
+			{
+				depthMat->setElement(i, j, (log(1 + alpha * depthMat->getElement(i, j)) / alpha) );
+			}
+			else
+			{
+				depthMat->setElement(i, j, 0.0);
+			}
+		}
+	}
 }
 
 

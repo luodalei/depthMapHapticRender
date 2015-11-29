@@ -232,7 +232,9 @@ int main(int argc, char* argv[])
 
 	// 2. gradient
 	uint radius2 = 3;
-	mappedMatrix = matrixDiff(*depthMatrix, radius2);
+	double thresh = 1.0;
+	double alpha = 5.0;
+	mappedMatrix = basRelief(*depthMatrix, radius2, thresh, alpha);
 
 
 	// test();
