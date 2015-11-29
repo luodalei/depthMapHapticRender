@@ -16,6 +16,7 @@
 //------------------------------------------------------------------------------
 #include "chai3d.h"
 #include "mappingAlgorithm.h" // Header file for algorithm
+
 #include <iostream> // For test only
 #include <fstream> // For test only
 //#include "png.h" //#include <cstdio> // use libpng to load png image?
@@ -111,8 +112,8 @@ int windowH;
 int windowPosX;
 int windowPosY;
 
-/* an matrix containing depth values (11/22/2015) */
-double** depthMatrix = 0;
+/* an matrix containing depth values (11/28/2015) */
+MMatrix* depthMatrix = new MMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -137,10 +138,10 @@ void close(void);
 void updateHaptics(void);
 
 // load image to an 2D array 
-int loadImage(string imgPath, int* imgSize, double** depthMat);
+int loadImage(string imgPath, uint* imgSize, MMatrix* depthMat);
 
 // find the depth range of a depth image
-double getDepthRange(double** depthMat);
+double getDepthRange(MMatrix* depthMat);
 
 int main(int argc, char* argv[])
 {
@@ -150,7 +151,7 @@ int main(int argc, char* argv[])
 
     cout << endl;
     cout << "-----------------------------------" << endl;
-    cout << "CHAI3D" << endl;
+    cout << "CHAI3D based Depth Map Haptics Rendering Project" << endl;
     cout << "-----------------------------------" << endl << endl << endl;
     cout << "Keyboard Options:" << endl << endl;
     cout << "[f] - Enable/Disable full screen mode" << endl;
@@ -204,12 +205,6 @@ int main(int argc, char* argv[])
     }
 
 	//=====================================================================================================
-	// Depth map matirx initialization
-	depthMatrix = new double*[IMAGE_HEIGHT];
-	for (int i = 0; i < IMAGE_HEIGHT; i++)
-	{
-		depthMatrix[i] = new double[IMAGE_WIDTH];
-	}
 
 	// Importing image 
 	string imagePath0 = "../bin/resources/image/rabbit.png"; 
@@ -218,21 +213,29 @@ int main(int argc, char* argv[])
 	string imagePath3 = "../bin/resources/image/ol_dm2.png";
 	string imagePath4 = "../bin/resources/image/ol_dm3.png";
 	string imagePath5 = "../bin/resources/image/ol_dm4.png";
-	int imageSize[2];
+	uint imageSize[2];
 
-	// Load the depth matrix into an 2D array
+	// Load the depth matrix
 	loadImage(imagePath5, imageSize, depthMatrix);
 
-	// Apply algorithm to the depth map
-	// construct Kernel
-	int radius = 10;
-	int sigma = 10;
+	MMatrix* mappedMatrix = new MMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);	
 
-	//double** mappedMatrix = depthMatrix; // Original 
-	double** mappedMatrix = gaussian(0.5, depthMatrix, radius, sigma); // Gaussian filter 
+	//*mappedMatrix = *depthMatrix; // Original 
+	///////////////////////////////////////////////////////////////////////////
+	// Apply algorithm to the depth map
+	///////////////////////////////////////////////////////////////////////////
+
+	// 1. Gaussian filtering
+	uint radius = 10;
+	int sigma = 4;
+	mappedMatrix = gaussian(0.5, *depthMatrix, radius, sigma); // Gaussian filter 
+
+	// 2. gradient
+	// test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	writeMatrix(mappedMatrix, IMAGE_WIDTH, IMAGE_HEIGHT, "modifedMap.txt");
+	// writeMatrix(depthMatrix, "originalMap.txt");
+	writeMatrix(mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
@@ -416,7 +419,8 @@ int main(int argc, char* argv[])
 			// compute the position of the vertex
 			double px = scaleXY * (double)x - offsetX;
 			double py = scaleXY * (double)y - offsetY;
-			double pz = -scaleZ * mappedMatrix[y][x];
+			//double pz = -scaleZ * mappedMatrix[y][x];
+			double pz = -scaleZ * mappedMatrix->getElement(y, x);
 
 			// set vertex position
 			object->m_vertices->setLocalPos(index, pz, px, py);
@@ -678,7 +682,7 @@ void updateHaptics(void)
 
 //------------------------------------------------------------------------------
 
-int loadImage(string imgPath, int* imgSize, double** depthMat)
+int loadImage(string imgPath, uint* imgSize, MMatrix* depthMat)
 {
 	//--------------------------------------------------------------------------
 	// LOAD FILE [11/13/2015 - present]
@@ -708,9 +712,9 @@ int loadImage(string imgPath, int* imgSize, double** depthMat)
 	imgSize[0] = depthImage->getHeight(); // map Row Num
 	imgSize[1] = depthImage->getWidth(); // map Col Num
 
-	for (int i = 0; i < imgSize[0]; i++)
+	for (uint i = 0; i < imgSize[0]; i++)
 	{
-		for (int j = 0; j < imgSize[1]; j++)
+		for (uint j = 0; j < imgSize[1]; j++)
 		{
 			isRight = depthImage->getPixelColor(j, i, depthValue);
 
@@ -720,16 +724,16 @@ int loadImage(string imgPath, int* imgSize, double** depthMat)
 			}
 
 			// For gray scale image, R = G = B = GrayScale
-			depthMat[i][j] = depthValue.m_color[0]; // Extract R Value as depth information
+			depthMat->setElement(i, j, depthValue.m_color[0]); // Extract R Value as depth information
 
-			depthMat[i][j] = depthMat[i][j] / 255;	// Normalize the depth image to [0 , 1] scale
+			depthMat->setElement(i, j, depthMat->getElement(i, j) / 255 ); // Normalize the depth image to [0 , 1] scale // Update needed !!!
 		}
 	}
 
 	return (0); // Successful
 }
 
-double getDepthRange(double** depthMat)
+double getDepthRange(MMatrix* depthMat)
 {
 	double minVal = 0.0;
 	double maxVal = 0.0;
@@ -738,8 +742,8 @@ double getDepthRange(double** depthMat)
 	{
 		for (int j = 0; j < IMAGE_WIDTH; j++)
 		{
-			if (depthMat[i][j] < minVal) minVal = depthMat[i][j];
-			if (depthMat[i][j] > maxVal) maxVal = depthMat[i][j];			
+			if (depthMat->getElement(i, j) < minVal) minVal = depthMat->getElement(i, j);
+			if (depthMat->getElement(i, j) > maxVal) maxVal = depthMat->getElement(i, j);
 		}
 	}
 	//cout << "min = " << minVal << " , max = " << maxVal << endl; // for test only

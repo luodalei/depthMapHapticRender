@@ -7,7 +7,7 @@
 IMAGE_WIDTH = 960;
 IMAGE_HEIGHT =540;
 
-% fileID = fopen('Map.txt');
+% fileID = fopen('originalMap.txt');
 fileID = fopen('modifedMap.txt');
 
 dataStream = textscan(fileID,repmat('%f',1,IMAGE_WIDTH));

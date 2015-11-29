@@ -21,10 +21,14 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCTION DECLARATION 
 ///////////////////////////////////////////////////////////////////////////////
-void readMatrix(double** mat, int width, int height, string filepath);
-void writeMatrix(double** mat, int width, int height, string filename);
-double** filter(double** mat, double** ker);
-double** gaussianKernel(int radius, int sigma);
+
+MMatrix* filter(MMatrix mat, MMatrix ker);
+
+/* Construct gaussian filter kernel block */
+MMatrix gaussianKernel(uint radius, int sigma);
+
+/* Construct sobel filter kernel block */
+MMatrix sobelKernel(size_t winSize);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
@@ -34,21 +38,36 @@ double** gaussianKernel(int radius, int sigma);
 ///////////////////////////////////////////////////////////////////////////////
 // Algorithm 1 : Adjust depth intensity + Gaussian Blur
 ///////////////////////////////////////////////////////////////////////////////
-double** gaussian(double intenSacle, double** depthMat, int radius, int sigma)
-{
-	double** retMat;
 
-	for (int i = 0; i < IMAGE_HEIGHT; i++)
+MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma)
+{
+	size_t height = depthMat.getRowsNum();
+	size_t width = depthMat.getColsNum();
+
+	for (uint i = 0; i < height; i++)
 	{
-		for (int j = 0; j < IMAGE_WIDTH; j++)
+		for (uint j = 0; j < width; j++)
 		{
-			depthMat[i][j] = depthMat[i][j] * intenSacle;
+			depthMat.setElement(i, j, depthMat.getElement(i, j) * intenSacle);
 		}
 	}
 
-	double** kernel = gaussianKernel(radius, sigma);
+	MMatrix kernel = gaussianKernel(radius, sigma);
 
-	retMat = filter(depthMat, kernel);
+	MMatrix* retMat = filter(depthMat, kernel);
+
+	return retMat;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Algorithm 2 : Bas-Relief -> Gradient compression
+// Weyrich, Tim, et al. "Digital bas-relief from 3D scenes." 
+// ACM Transactions on Graphics(TOG).Vol. 26. No. 3. ACM, 2007.
+///////////////////////////////////////////////////////////////////////////////
+
+MMatrix gradient(double intenSacle, MMatrix depthMat, int radius)
+{
+	MMatrix retMat(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
 
 	return retMat;
 }
@@ -58,33 +77,39 @@ double** gaussian(double intenSacle, double** depthMat, int radius, int sigma)
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Import the original depth map image */
-void readMatrix(double** mat, int width, int height, string filepath)
+void readMatrix(MMatrix* mat, string filepath)
 {
 	ifstream inFile;
 	string str;
 
+	size_t height = mat->getRowsNum();
+	size_t width = mat->getColsNum();
+
 	inFile.open(filepath);
-	for (int i = 0; i < height; i++)
+	for (uint i = 0; i < height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (uint j = 0; j < width; j++)
 		{
 			getline(inFile, str, ' ');
-			mat[i][j] = stof(str);
+			mat->setElement(i, j, stof(str));
 		}
 	}
 	inFile.close();
 }
 
 /* Export the mapped image to a .txt file */
-void writeMatrix(double** mat, int width, int height, string filename)
+void writeMatrix(MMatrix* mat, string filename)
 {
+	size_t height = mat->getRowsNum();
+	size_t width = mat->getColsNum();
+
 	ofstream outFile;
 	outFile.open(filename);
-	for (int i = 0; i < height; i++)
+	for (uint i = 0; i < height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (uint j = 0; j < width; j++)
 		{
-			outFile << mat[i][j] << " ";
+			outFile << mat->getElement(i, j) << " ";
 		}
 		outFile << endl;
 	}
@@ -96,37 +121,27 @@ void writeMatrix(double** mat, int width, int height, string filename)
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Apply filter to input data matrix */
-double** filter(double** mat, double** ker)
+MMatrix* filter(MMatrix mat, MMatrix ker)
 {
-	int radius = sizeof(ker);
-	int kerLen = 2 * radius + 1;
+	size_t kerLen = ker.getRowsNum();
+	int radius = (kerLen - 1) / 2;
+	
 	double deftWeightSum = 0; // default sum of kernel weight
 
-	double** mappedMat = 0;
-	mappedMat = new double*[IMAGE_HEIGHT];
+	MMatrix* mappedMat = new MMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
 
-	// initialize an empty mapped matrix
-	for (int i = 0; i < IMAGE_HEIGHT; i++) 
+	for (uint p = 0; p < kerLen; p++)
 	{
-		mappedMat[i] = new double[IMAGE_WIDTH];
-		for (int j = 0; j < IMAGE_WIDTH; j++)
+		for (uint q = 0; q < kerLen; q++)
 		{
-			mappedMat[i][j] = 0;
-		}
-	}
-
-	for (int p = 0; p < kerLen; p++)
-	{
-		for (int q = 0; q < kerLen; q++)
-		{
-			deftWeightSum += ker[p][q];
+			deftWeightSum += ker.getElement(p,q);
 		}
 	}
 
 	// Apply filter
-	for (int i = 0; i < IMAGE_HEIGHT; i++)
+	for (uint i = 0; i < IMAGE_HEIGHT; i++)
 	{
-		for (int j = 0; j < IMAGE_WIDTH; j++)
+		for (uint j = 0; j < IMAGE_WIDTH; j++)
 		{
 			int mInit = -radius;
 			int mEnd = radius;
@@ -146,20 +161,20 @@ double** filter(double** mat, double** ker)
 			{
 				for (int n = nInit; n < nEnd; n++)
 				{
-					// Average filter
-					filtSum += mat[i + m][j + n] * ker[m + radius][n + radius];
-					weightSum += ker[m + radius][n + radius];
+					// convolution
+					filtSum += mat.getElement(i + m, j + n) * ker.getElement(m + radius, n + radius);
+					weightSum += ker.getElement(m + radius, n + radius);
 				}
 			}
 	
 			if (weightSum < deftWeightSum) 
 			{
 				// In case of kernel block being truncated
-				mappedMat[i][j] = filtSum * deftWeightSum / weightSum;
+				mappedMat->setElement(i, j, (filtSum * deftWeightSum / weightSum) );
 			}
 			else 
 			{
-				mappedMat[i][j] = filtSum;
+				mappedMat->setElement(i, j, filtSum);
 			}
 		}
 	}
@@ -167,36 +182,63 @@ double** filter(double** mat, double** ker)
 	return mappedMat;
 }
 
-double** gaussianKernel(int radius, int sigma)
+/* Construct gaussian filter kernel block */
+MMatrix gaussianKernel(uint radius, int sigma)
 {
-	int kerLen = 2 * radius + 1;
-	int sigma2 = 2 * sigma;
+	size_t kerLen = 2 * radius + 1; // kerLen * kerLen square matrix
+	double sigma2 = 2 * sigma * sigma; // gaussian parameter sigma
 
-	int mu = (kerLen - 1) / 2;
+	int mu = (kerLen - 1) / 2; // zero mean 
 
 	double kerSum = 0;
 
-	double** ker = 0;
-	ker = new double*[kerLen];
+	MMatrix ker(kerLen, kerLen, 0.0);
+
+	//ker = new double*[kerLen];
 
 	for (int i = 0; i < kerLen; i++)
 	{
-		ker[i] = new double[kerLen];
+		//ker[i] = new double[kerLen];
 		for (int j = 0; j < kerLen; j++)
 		{
-			ker[i][j] = exp(-((i - mu)*(i - mu) + (j - mu)*(j - mu)) / sigma2);
-			kerSum += ker[i][j];
+			// kernel weight = e^{ -( ((i- \mu)^2+(j-\mu)^2) )/( 2* \sigma^2 )}
+			ker.setElement(i, j, (exp(-((i - mu)*(i - mu) + (j - mu)*(j - mu)) / sigma2)) );
+			kerSum += ker.getElement(i, j);
 		}
 	}
-	for (int i = 0; i < kerLen; i++)
+	for (uint i = 0; i < kerLen; i++)
 	{
-		for (int j = 0; j < kerLen; j++)
+		for (uint j = 0; j < kerLen; j++)
 		{
-			ker[i][j] /= kerSum;
-			ker[i][j] = floor(ker[i][j] * 1000000.0) / 1000000.0;
+			ker.setElement(i, j, (ker.getElement(i, j) / kerSum)); // Update needed in the future !!!
+			ker.setElement(i, j,  (floor(ker.getElement(i, j) * 1000000.0) / 1000000.0) );
 			//cout << ker[i][j] << " "; // for test only
 		}
 		cout << endl;
 	}
 	return ker;
+}
+
+/* Construct sobel filter kernel block (x direction) */
+MMatrix sobelKernel(size_t winSize)
+{
+	// Construct a smooth operater (row vector)
+	MVector smoothOperator = pascalTriangle(winSize, 1.0, 1.0);
+
+	// Construct a difference operater (row vector)
+	MVector diffOperator = pascalTriangle(winSize, 1.0, -1.0);
+
+	// Sobel kernal matrix = $ (smooth operater)^T \cdot difference operater $
+	MMatrix ker = (~smoothOperator) * diffOperator;
+
+	return ker;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// TestOnly FUNCTIONS
+///////////////////////////////////////////////////////////////////////////////
+void test()
+{
+	//sobelKernel(5);
 }

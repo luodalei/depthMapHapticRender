@@ -16,9 +16,15 @@
     <ClCompile Include="mappingAlgorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mathTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mappingAlgorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mathTool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

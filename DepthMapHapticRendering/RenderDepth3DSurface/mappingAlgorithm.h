@@ -8,8 +8,8 @@ All the tone-mapping algorithms (as functions) are included in this file.
 //==============================================================================
 
 #include <string>
+#include "mathTool.h"
 //------------------------------------------------------------------------------
-using namespace std;
 
 //------------------------------------------------------------------------------
 // MARCO
@@ -31,13 +31,18 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 // Algorithm 1 : Adjust depth intensity and apply Gaussian filter
-double** gaussian(double intenSacle, double** depthMat, int radius, int sigma);
+MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma);
 
 //------------------------------------------------------------------------------
 // ASSISTIVE FUNCTIONS
 //------------------------------------------------------------------------------
 /* Import the original depth map image */
-void readMatrix(double** mat, int width, int height, string filepath);
+void readMatrix(MMatrix* mat, std::string filepath);
 
 /* Export the mapped image to a .txt file */
-void writeMatrix(double** mat, int width, int height, string filename);
+void writeMatrix(MMatrix* mat, std::string filename);
+
+//------------------------------------------------------------------------------
+// FOR TEST ONLY
+//------------------------------------------------------------------------------
+void test();
