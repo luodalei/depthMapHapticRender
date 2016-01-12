@@ -194,9 +194,6 @@ int main(int argc, char* argv[])
     glutKeyboardFunc(keySelect);
     glutReshapeFunc(resizeWindow);
     glutSetWindowTitle("Render Depth Map 3D Surface");
-	
-	//================just for test ==========================
-	// const char * imagePath = "../bin/resources/images/rabbit.tif";
 
     // set fullscreen mode
     if (fullscreen)
@@ -231,17 +228,17 @@ int main(int argc, char* argv[])
 	//mappedMatrix = gaussian(0.5, *depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. gradient
-	uint radius2 = 3;
-	double thresh = 1.0;
+	uint radius2 = 1; // ( 3 )
+	double thresh = 100;
 	double alpha = 5.0;
-	mappedMatrix = basRelief(*depthMatrix, radius2, thresh, alpha);
 
+	//mappedMatrix = basRelief(*depthMatrix, radius2, thresh, alpha);
 
-	// test();
+	test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
 	// writeMatrix(depthMatrix, "originalMap.txt");
-	 writeMatrix(mappedMatrix, "modifedMap.txt");
+	//writeMatrix(mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================

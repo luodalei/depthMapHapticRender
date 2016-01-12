@@ -349,7 +349,7 @@ void MMatrix:: add(double added)
 	{
 		for (uint j = 0; j < this->colsNum; j++)
 		{
-			this->mMat[i][j] -= added;
+			this->mMat[i][j] += added;
 		}
 	}
 }
