@@ -16,16 +16,17 @@ instead.
 #include <iostream> 
 #include <fstream> 
 #include <string>
+#include<tuple>
 #include <time.h> // Evaluate algorithm by time
 
 //------------------------------------------------------------------------------
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCTION (LOCAL USE ONLY) DECLARATION 
 ///////////////////////////////////////////////////////////////////////////////
 
-MMatrix* filter(MMatrix mat, MMatrix ker);
+/* 2D Filter */
+MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange = std::make_tuple(0, 0, 0, 0));
 
 /* Construct gaussian filter kernel block */
 MMatrix gaussianKernel(uint radius, int sigma);
@@ -34,13 +35,13 @@ MMatrix gaussianKernel(uint radius, int sigma);
 MMatrix sobelKernel(size_t winSize);
 
 /* Threshold filter */
-MMatrix* threshold(MMatrix depthMat, double thres);
+MMatrix threshold(MMatrix* depthMat, double thres);
 
 /* Gradient Compression */
 void compressed(MMatrix* depthMat, double thres,  double alpha);
 
 /* Solving Poisson equation to estimate 2D integrals*/
-MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy);
+MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
@@ -51,13 +52,13 @@ MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy);
 // Algorithm 1 : Adjust depth intensity + Gaussian Blur
 ///////////////////////////////////////////////////////////////////////////////
 
-MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma)
+MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 {
-	depthMat.mul(intenSacle);
+	depthMat->mul(intenSacle);
 
 	MMatrix kernel = gaussianKernel(radius, sigma);
 
-	MMatrix* retMat = filter(depthMat, kernel);
+	MMatrix retMat = filter(depthMat, kernel);
 
 	return retMat;
 }
@@ -68,19 +69,19 @@ MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma)
 // ACM Transactions on Graphics(TOG).Vol. 26. No. 3. ACM, 2007.
 ///////////////////////////////////////////////////////////////////////////////
 
-MMatrix* basRelief(MMatrix depthMat, uint radius, double thres, double alpha)
+MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
 	double accuracy = 0.001; // Accuracy of integration approximation
 
 	// Select Kernel for matrix differeniation
 
 	// Sobel Kernel
-	//MMatrix kernel = sobelKernel(2*radius+1);
+	MMatrix kernel = sobelKernel(2*radius+1);
 
 	// Forward Difference Kernel (3-by-3)
 	MMatrix fwdKer(3, 3, 0.0);
-	fwdKer.setElement(1, 1, 1);
-	fwdKer.setElement(1, 2, -1);
+	fwdKer.setElement(1, 1, -1);
+	fwdKer.setElement(1, 2, 1);
 
 	// Backward Difference Kernel (3-by-3)
 	MMatrix bkdKer(3, 3, 0.0);
@@ -88,65 +89,95 @@ MMatrix* basRelief(MMatrix depthMat, uint radius, double thres, double alpha)
 	bkdKer.setElement(1, 1, 1);
 
 	// Acquire map Forward Difference (Step I)
-	MMatrix** matrixGradient = matrixDiff(depthMat, fwdKer, false);
+	MMatrix diffX(0, 0);
+	MMatrix diffY(0, 0);
+	MMatrix diffMag(0, 0);
 
-	MMatrix* diffX = matrixGradient[0];
-	MMatrix* diffY = matrixGradient[1];
-	MMatrix* diffMag = matrixGradient[2];
+	std::tie(diffX, diffY, diffMag) = matrixDiff(depthMat, kernel, true);
+
+	//diffX = filter(depthMat, fwdKer, std::make_tuple(0, 0, 0, -1));
+	////diffX.display();
+	//diffY = filter(depthMat, ~fwdKer, std::make_tuple(0, -1, 0, 0));
+	////diffY.display();
+	writeMatrix(&diffX, "modifedMap.txt");
+
+	return diffX;
+
+	//diffMag = diffX.times(diffX) + diffY.times(diffY);
+	//diffMag.sqroot(); // $sqrt{ x^2 + y^2 }$
+
+	//diffX /= diffMag; // gradient direction x
+	//diffY /= diffMag; // gradient direction y
+
 
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
-	compressed(diffMag, thres, alpha);
+	//compressed(&diffMag, thres, alpha);
 
 	// g' = s' $\times$ v'
-	(*diffX) *= (*diffMag); 
-	(*diffY) *= (*diffMag);
-
+	//diffX.display();
+	//diffY.display();
 	// Integration  (Step III)
 
 	// Acquire map Backward Difference
-	MMatrix** divG = matrixDiff(*diffMag, bkdKer, false);
+	//MMatrix divGx = filter(&diffX, bkdKer);
+	//MMatrix divGy = filter(&diffY, ~bkdKer);
+	////divGx.display();
+	////divGy.display();
+	//MMatrix divG = divGx + divGy;
+	//divG.display();
+	//writeMatrix(&diffX, "modifedMap.txt");
 
-	MMatrix* V = new MMatrix(depthMat.getRowsNum(), depthMat.getColsNum(), 0.0);
-	MMatrix* rho = divG[2];
+	//MMatrix initMat = *depthMat;
+	//std::cout << "Acquire Integration " << std::endl;
+	//MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
+	//iMat.display();
 
-	MMatrix* retMat = IntgralSolver(V, rho, accuracy);
+	//// Error
+	//std::cout << "Error " << std::endl;
+	//(iMat - (*depthMat)).display();
 
-	return retMat;
+	//MMatrix initMat = *depthMat;
+	//MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy);
+
+	//// Calculate error
+	//double error = 0.0;
+	//for (int i = 0; i < depthMat->getRowsNum(); i++)
+	//	for (int j = 0; j < depthMat->getColsNum(); j++)
+	//		error += (depthMat->getElement(i, j) - retMat.getElement(i, j)) / depthMat->getElement(i, j)*100;
+	//std::cout << "Total error = " << error << " % " << std::endl
+	//	<< "Average error = " << error / (depthMat->getRowsNum() * depthMat->getColsNum()) << " % " << std::endl;
+
+	//return retMat;
 }
 
 // Edge detection (matrix differentiation)
-MMatrix** matrixDiff(MMatrix depthMat, MMatrix ker, bool isDirect)
+M3MatPtr matrixDiff(MMatrix* depthMat, MMatrix ker, bool isDirect)
 {
-	cout << "Matrix differenitation with Kernel:" << endl;
+	// gradient X direction
+	MMatrix diffX = filter(depthMat, ker);
 
-	MMatrix* retMat[3];
-
-	// diffX
-	retMat[0] = filter(depthMat, ker);
+	// Display kernel
+	std::cout << "Matrix differenitation with Kernel:" << std::endl;
 	ker.display();
 
-	// diffY
-	retMat[1] = filter(depthMat, (~ker));
+	// gradient Y direction
+	MMatrix diffY = filter(depthMat, (~ker));
 
-	MMatrix* diffMag = new MMatrix(depthMat.getRowsNum(), depthMat.getColsNum(), 0.0);
+	// gradient magnitude
+	MMatrix diffMag(depthMat->getRowsNum(), depthMat->getColsNum(), 0.0);
 
-	(*diffMag) = (retMat[0]->times(*retMat[0])) + (retMat[1]->times(*retMat[1]));
-	diffMag->sqroot(); // $sqrt{ x^2 + y^2 }$
+	diffMag = diffX.times(diffX) + diffY.times(diffY);
+	diffMag.sqroot(); // $sqrt{ x^2 + y^2 }$
 
 	if (isDirect == true) // Choose whether normalized x and y
 	{
-		(*retMat[0]) /= (*diffMag); // gradient direction x
-		(*retMat[1]) /= (*diffMag); // gradient direction y
+		diffX /= diffMag; // gradient direction x
+		diffY /= diffMag; // gradient direction y
 	}
 
-	//retMat[0] -> display();
-	//retMat[0] -> display();
+	// diffMag = threshold(*diffX, 0.015); // Edge detection
 
-	retMat[2] = diffMag; // gradient magnitude
-
-	//MMatrix* retMat = threshold(*diffX, 0.015); // Edge detection
-
-	return retMat;
+	return std::make_tuple(diffX, diffY, diffMag); // Pack multiple return as tuple
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,10 +185,10 @@ MMatrix** matrixDiff(MMatrix depthMat, MMatrix ker, bool isDirect)
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Import the original depth map image */
-void readMatrix(MMatrix* mat, string filepath)
+void readMatrix(MMatrix* mat, std::string filepath)
 {
-	ifstream inFile;
-	string str;
+	std::ifstream inFile;
+	std::string str;
 
 	size_t height = mat->getRowsNum();
 	size_t width = mat->getColsNum();
@@ -175,12 +206,12 @@ void readMatrix(MMatrix* mat, string filepath)
 }
 
 /* Export the mapped image to a .txt file */
-void writeMatrix(MMatrix* mat, string filename)
+void writeMatrix(MMatrix* mat, std::string filename)
 {
 	size_t height = mat->getRowsNum();
 	size_t width = mat->getColsNum();
 
-	ofstream outFile;
+	std::ofstream outFile;
 	outFile.open(filename);
 	for (uint i = 0; i < height; i++)
 	{
@@ -188,7 +219,7 @@ void writeMatrix(MMatrix* mat, string filename)
 		{
 			outFile << mat->getElement(i, j) << " ";
 		}
-		outFile << endl;
+		outFile << std::endl;
 	}
 	outFile.close();
 }
@@ -198,10 +229,78 @@ void writeMatrix(MMatrix* mat, string filename)
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Apply filter to input data matrix */
-MMatrix* filter(MMatrix mat, MMatrix ker)
+MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 {
-	size_t height = mat.getRowsNum();
-	size_t width = mat.getColsNum();
+	int height = mat->getRowsNum();
+	int width = mat->getColsNum();
+
+	int rInit, rEnd, cInit, cEnd;
+
+	// Optional argument: filter range
+	//if ((std::get<0>(filtRange) == 0) && (std::get<1>(filtRange) == 0) &&
+	//	(std::get<2>(filtRange) == 0) && (std::get<3>(filtRange) == 0) )
+	//{
+	//	std::cout << "Filtering entire matrix" << std::endl;
+		rInit = 0;
+		rEnd = height;
+		cInit = 0;
+		cEnd = width;
+	//}
+	//else
+	//{
+	/*	if (std::get<1>(filtRange) >= height)
+		{
+			std::cerr << "Warning: 'rEnd' out of matrix boundary" << std::endl;
+			rEnd = height;
+		}
+		else if (std::get<1>(filtRange) <= 0)
+		{
+			rEnd = int(height) + std::get<1>(filtRange);
+			if (rEnd <= 0) rEnd = height;
+		}
+		else
+		{
+			rEnd = std::get<1>(filtRange) +1;
+		}
+
+		if ( (std::get<0>(filtRange) >= rEnd) || (std::get<0>(filtRange) < 0) )
+		{
+			std::cerr << "Warning: illegal 'rInit' value" << std::endl;
+			rInit = 0;
+		}
+		else
+		{
+			rInit = std::get<0>(filtRange);
+		}
+
+		if (std::get<3>(filtRange) >= width)
+		{
+			std::cerr << "Warning: 'cEnd' out of matrix boundary" << std::endl;
+			cEnd = width;
+		}
+		else if (std::get<3>(filtRange) <= 0)
+		{
+			cEnd = int(width) + std::get<3>(filtRange);
+			if (cEnd <= 0) cEnd = width;
+		}
+		else
+		{
+			cEnd = std::get<3>(filtRange) +1;
+		}
+
+		if ( (std::get<2>(filtRange) >= cEnd) || (std::get<2>(filtRange) < 0) )
+		{
+			std::cerr << "Warning: illegal 'cInit' value" << std::endl;
+			cInit = 0;
+		}
+		else
+		{
+			cInit = std::get<2>(filtRange);
+		}*/
+
+		std::cout << "Filtering in Row " << rInit << " to " << rEnd-1
+			<< " , Col " << cInit << " to " << cEnd-1 << std::endl;
+	//}
 
 	size_t kerLen = ker.getRowsNum();
 
@@ -209,7 +308,7 @@ MMatrix* filter(MMatrix mat, MMatrix ker)
 	int mod; // Modify the range of kernel for odd or even sites
 	double deftWeightSum = 0; // default sum of kernel weight
 
-	MMatrix* mappedMat = new MMatrix(height, width, 0.0);
+	MMatrix mappedMat = *mat;
 
 	for (uint p = 0; p < kerLen; p++)
 	{
@@ -231,9 +330,9 @@ MMatrix* filter(MMatrix mat, MMatrix ker)
 	}
 
 		// Apply filter
-	for (int i = 0; i < height; i++)
+	for (int i = rInit; i < rEnd; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = cInit; j < cEnd; j++)
 		{
 			int mInit = -radius;
 			int mEnd = radius + mod;
@@ -254,7 +353,7 @@ MMatrix* filter(MMatrix mat, MMatrix ker)
 				for (int n = nInit; n <= nEnd; n++)
 				{
 					// convolution
-					filtSum += mat.getElement(i + m, j + n) * ker.getElement(m + radius, n + radius);
+					filtSum += mat->getElement(i + m, j + n) * ker.getElement(m + radius, n + radius);
 					weightSum += ker.getElement(m + radius, n + radius);
 				}
 			}
@@ -262,11 +361,11 @@ MMatrix* filter(MMatrix mat, MMatrix ker)
 			if ((weightSum < deftWeightSum) && (deftWeightSum != 0) && (weightSum != 0))
 			{
 				// In case of kernel block being truncated
-				mappedMat->setElement(i, j, (filtSum * deftWeightSum / weightSum));
+				mappedMat.setElement(i, j, (filtSum * deftWeightSum / weightSum));
 			}
 			else
 			{
-				mappedMat->setElement(i, j, filtSum);
+				mappedMat.setElement(i, j, filtSum);
 			}
 		}
 	}
@@ -309,7 +408,7 @@ MMatrix gaussianKernel(uint radius, int sigma)
 			ker.setElement(i, j,  (floor(ker.getElement(i, j) * 1000000.0) / 1000000.0) );
 			//cout << ker[i][j] << " "; // for test only
 		}
-		cout << endl;
+		std::cout << std::endl;
 	}
 
 	//ker.display(); // For test only
@@ -332,19 +431,19 @@ MMatrix sobelKernel(size_t winSize)
 }
 
 /* Threshold filter */
-MMatrix* threshold(MMatrix depthMat, double thres)
+MMatrix threshold(MMatrix* depthMat, double thres)
 {
-	MMatrix* retMat = new MMatrix(depthMat.getRowsNum(), depthMat.getColsNum(), 0.0);
+	MMatrix retMat = *depthMat;
 
-	double offset = depthMat.min();
+	double offset = depthMat->min();
 
-	double range = depthMat.max() - offset;
+	double range = depthMat->max() - offset;
 
 	// Normalization of the matrix
-	depthMat.sub(offset); // minus minimum value
-	depthMat.div(range); // divided by range
+	retMat.sub(offset); // minus minimum value
+	retMat.div(range); // divided by range
 
-	*retMat = depthMat.isGreator(thres);
+	retMat = retMat.isGreator(thres);
 
 	return retMat;
 }
@@ -372,18 +471,20 @@ void compressed(MMatrix* depthMat, double thres, double alpha)
 }
 
 /* Solving Poisson equation: \triangledown^2 V = \rho */
-MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
+MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 {
 	size_t height = V1->getRowsNum();
 	size_t width = V1->getColsNum();
 
-	MMatrix* V1_new = new MMatrix(height, width, 0.0); // Updated matrix
+	MMatrix V1_new = *V1; // Updated matrix
 
 	clock_t t0 = clock(); // Initial time of the solver
 
 	int steps = 0; //  count iteration steps
 	double omega = 2 / (1 + M_PI / sqrt(height*width)); // For SOR method only
 	bool continueItr = true; // whether the iteration continues
+
+	std::cout << "Solving Equation ..." << std::endl;
 
 	while (continueItr)
 	{
@@ -406,20 +507,37 @@ MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 			for (uint j = 1; j <= width - 2; j++)
 			{
 				if ((i + j) % 2 == 0) // Update even sites
-					V1_new->setElement(i, j, (1 - omega) * V1->getElement(i, j)
-					+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-					+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-					- rho1->getElement(i, j)));
+				{
+					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+						+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+						+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+						- rho1->getElement(i, j)));
+					//std::cout << (1 - omega) << " * " << V1->getElement(i, j) << " + " 
+					//	<< omega * 0.25
+					//	<< "* ( "
+					//	<< V1->getElement(i - 1, j) << " + "
+					//	<< V1->getElement(i + 1, j) << " + "
+					//	<< V1->getElement(i, j - 1) << " + "
+					//	<< V1->getElement(i, j + 1) << " - "
+					//	<< rho1->getElement(i, j) << " ) = "
+					//	<< (1 - omega) * V1->getElement(i, j)
+					//	+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+					//	+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+					//	- rho1->getElement(i, j))
+					//	<< std::endl;
+					//std::cout << " " << V1->getElement(i, j) << std::endl;
+				}
 			}
 		}
+
 		for (uint i = 1; i <= height - 2; i++)
 		{
 			for (uint j = 1; j <= width - 2; j++)
 			{
 				if ((i + j) % 2 != 0) // Update odd sites
-					V1_new->setElement(i, j, (1 - omega) * V1->getElement(i, j)
-					+ omega * 0.25 * (V1_new->getElement(i - 1, j) + V1_new->getElement(i + 1, j)
-					+ V1_new->getElement(i, j - 1) + V1_new->getElement(i, j + 1)
+					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+					+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
+					+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
 					- rho1->getElement(i, j)));
 			}
 		}
@@ -433,7 +551,7 @@ MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 			for (int j = 1; j <= width - 2; j++)
 			{
 				double oldVal = V1->getElement(i, j);
-				double newVal = V1_new->getElement(i, j);
+				double newVal = V1_new.getElement(i, j);
 				if (newVal != 0)
 					if (newVal != oldVal)
 					{
@@ -442,6 +560,7 @@ MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 					}
 			}
 		}
+		//std::cout << error << " , n = " << n << std::endl;
 
 		if (n != 0) error /= n;
 
@@ -451,16 +570,14 @@ MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 		}
 		else
 		{
-			MMatrix* tempt = V1;
-			V1 = V1_new;
-			V1_new = tempt;
+			*V1 = V1_new;
 		}
 
 		steps++;
 	}
 
-	cout << "Number of steps = " << steps << endl;
-	cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << endl;
+	std::cout << "Number of steps = " << steps << std::endl;
+	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
 
 	return V1_new;
 }
@@ -472,14 +589,14 @@ MMatrix* IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 void test()
 {
 	// Test Poisson equation solver on 01/11/2016
-	int L = 10;
+	int L = 20;
 	MMatrix* V = new MMatrix(L , L , 0.0);
 	for (uint i = 0; i < L; i++)
 		for (uint j = 0; j < L; j++)
-			V->setElement(i, j, i*L + j);
-	//V->display();
+			V->setElement(i, j, rand()%10+1);
+	V->display();
 
-	MMatrix kernel = sobelKernel(2 * 1 + 1);
+	//MMatrix kernel = sobelKernel(2 * 1 + 1);
 
 	// Forward Difference Kernel (3-by-3)
 	MMatrix fwdKer(3, 3, 0.0);
@@ -488,12 +605,45 @@ void test()
 
 	// Backward Difference Kernel (3-by-3)
 	MMatrix bkdKer(3, 3, 0.0);
-	bkdKer.setElement(1, 0, -1);
-	bkdKer.setElement(1, 1, 1);
+	bkdKer.setElement(1, 0, 1);
+	bkdKer.setElement(1, 1, -1);
 
-	// Acquire map Forward Difference 
-	MMatrix** divH = matrixDiff(*V, fwdKer, false);
+	// // Acquire map Forward Difference 
+	//MMatrix diffX = filter(V, fwdKer, std::make_tuple(0,0,0,-1));
+	////diffX.display();
+	//MMatrix diffY = filter(V, ~fwdKer, std::make_tuple(0, -1, 0, 0));
+	////diffY.display();
+
+	MMatrix diffX(L, L, 0.0);
+	MMatrix diffY(L, L, 0.0);
+	MMatrix diffMag(L, L, 0.0);
+
+	std::tie(diffX, diffY, diffMag) = matrixDiff(V, fwdKer, true);
+
+	// Gradient Compression (change only the gradient magnitude)  (Step II)
+	compressed(&diffMag, 100, 5.0);
+
+	// g' = s' $\times$ v'
+	diffX *= diffMag;
+	diffY *= diffMag;
 
 	// Acquire map Backward Difference 
-	MMatrix** divG = matrixDiff(*V, bkdKer, false);
+	std::cout << "Acquire map Backward Difference " << std::endl;
+	MMatrix divGx = filter(&diffX, bkdKer);
+	//divGx.display();
+	MMatrix divGy = filter(&diffY, ~bkdKer);
+	//divGy.display();
+	MMatrix divG = divGx + divGy;
+	//divG.mul( 0.9 );
+	divG.display();
+
+	// Acquire Integration
+	MMatrix initMat = *V;
+	std::cout << "Acquire Integration " << std::endl;
+	MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
+	iMat.display();
+
+	// Error
+	std::cout << "Error " << std::endl;
+	(iMat - (*V)).display();
 }

@@ -30,19 +30,23 @@ All the tone-mapping algorithms (as functions) are included in this file.
 #  define M_PI 3.1415926535897
 #endif
 
+// Define dype
+typedef std::tuple<uint, int, uint, int> Range2D; // Store range of rows and columns of a matrix
+typedef std::tuple<MMatrix, MMatrix, MMatrix> M3MatPtr; // 3 MMatrix tuple
+
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
 //------------------------------------------------------------------------------
 
 // Algorithm 1 : Adjust depth intensity and apply Gaussian filter
-MMatrix* gaussian(double intenSacle, MMatrix depthMat, uint radius, int sigma);
+MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma);
 
 // Algorithm 2 : Bas-Relief -> Gradient compression
-MMatrix* basRelief(MMatrix depthMat, uint radius, double thres, double alpha);
+MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha);
 
 // Edge detection (matrix differentiation)
-MMatrix** matrixDiff(MMatrix depthMat, MMatrix ker, bool isDirect);
+M3MatPtr matrixDiff(MMatrix* depthMat, MMatrix ker, bool isDirect);
 
 //------------------------------------------------------------------------------
 // ASSISTIVE FUNCTIONS

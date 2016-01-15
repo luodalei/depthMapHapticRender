@@ -113,7 +113,7 @@ int windowPosX;
 int windowPosY;
 
 /* an matrix containing depth values (11/28/2015) */
-MMatrix* depthMatrix = new MMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
+MMatrix depthMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -213,32 +213,40 @@ int main(int argc, char* argv[])
 	uint imageSize[2];
 
 	// Load the depth matrix
-	loadImage(imagePath5, imageSize, depthMatrix);
+	loadImage(imagePath5, imageSize, &depthMatrix);
 
-	MMatrix* mappedMatrix = new MMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);	
+	MMatrix mappedMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);	
 
-	//*mappedMatrix = *depthMatrix; // Original 
+	//mappedMatrix = depthMatrix; // Original 
 	///////////////////////////////////////////////////////////////////////////
 	// Apply algorithm to the depth map
 	///////////////////////////////////////////////////////////////////////////
 
 	// 1. Gaussian filtering
-	//uint radius = 5;
-	//int sigma = 4;
-	//mappedMatrix = gaussian(0.5, *depthMatrix, radius, sigma); // Gaussian filter 
+	uint radius = 5;
+	int sigma = 4;
+	mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. gradient
-	uint radius2 = 1; // ( 3 )
+	uint radius2 = 3; //
 	double thresh = 100;
-	double alpha = 5.0;
+	double alpha = 1.0;
 
-	//mappedMatrix = basRelief(*depthMatrix, radius2, thresh, alpha);
+	// Test Poisson equation solver on 01/11/2016
+	/*int L = 5;
+	MMatrix* V = new MMatrix(L, L, 0.0);
+	for (uint i = 0; i < L; i++)
+		for (uint j = 0; j < L; j++)
+			V->setElement(i, j, rand() % 10 + 1);
+	V->display();*/
 
-	test();
+	mappedMatrix = basRelief(&depthMatrix, radius2, thresh, alpha);
+
+	//test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	// writeMatrix(depthMatrix, "originalMap.txt");
-	//writeMatrix(mappedMatrix, "modifedMap.txt");
+	// writeMatrix(&depthMatrix, "originalMap.txt");
+	// writeMatrix(&mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
@@ -394,7 +402,7 @@ int main(int argc, char* argv[])
 	int sizeY = imageSize[0];
 
 	// get the depth range of the image
-	double sizeZ = getDepthRange(mappedMatrix);
+	double sizeZ = getDepthRange(&mappedMatrix);
 
 	// we look for the largest side
 	int largestSide = cMax(sizeX, sizeY);
@@ -423,7 +431,7 @@ int main(int argc, char* argv[])
 			double px = scaleXY * (double)x - offsetX;
 			double py = scaleXY * (double)y - offsetY;
 			//double pz = -scaleZ * mappedMatrix[y][x];
-			double pz = -scaleZ * mappedMatrix->getElement(y, x);
+			double pz = -scaleZ * mappedMatrix.getElement(y, x);
 
 			// set vertex position
 			object->m_vertices->setLocalPos(index, pz, px, py);
