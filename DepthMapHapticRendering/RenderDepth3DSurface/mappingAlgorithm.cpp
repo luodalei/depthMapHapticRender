@@ -103,46 +103,50 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	//diffMag.sqroot(); // $sqrt{ x^2 + y^2 }$
 
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
-	//compressed(&diffMag, thres, alpha);
+	compressed(&diffMag, thres, alpha);
+
+	writeMatrix(&diffMag, "modifedMap.txt");
 
 	// g' = s' $\times$ v'
 	diffX *= diffMag; // gradient direction x times amplitude
 	diffY *= diffMag; // gradient direction y times amplitude
-	diffX.display();
-	diffY.display();
+	//diffX.display();
+	//diffY.display();
 
 	// Integration  (Step III)
 
 	// Acquire map Backward Difference
 	MMatrix divGx = filter(&diffX, bkdKer);
 	MMatrix divGy = filter(&diffY, ~bkdKer);
-	divGx.display();
-	divGy.display();
+	//divGx.display();
+	//divGy.display();
 	MMatrix divG = divGx + divGy;
-	divG.display();
-	writeMatrix(&divG, "modifedMap.txt");
-
-	MMatrix initMat = *depthMat;
-	std::cout << "Acquire Integration " << std::endl;
-	MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
-	iMat.display();
-
-	// Error
-	std::cout << "Error " << std::endl;
-	(iMat - (*depthMat)).display();
+	//divG.display();
+	//writeMatrix(&divG, "modifedMap.txt"); // Visualize (test) divG
 
 	//MMatrix initMat = *depthMat;
-	//MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy);
+	//std::cout << "Acquire Integration " << std::endl;
+	//MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
+	//iMat.display();
+	// Error (display all)
+	//std::cout << "Error " << std::endl;
+	//(iMat - (*depthMat)).display();
 
-	//// Calculate error
-	//double error = 0.0;
-	//for (int i = 0; i < depthMat->getRowsNum(); i++)
-	//	for (int j = 0; j < depthMat->getColsNum(); j++)
-	//		error += (depthMat->getElement(i, j) - retMat.getElement(i, j)) / depthMat->getElement(i, j)*100;
-	//std::cout << "Total error = " << error << " % " << std::endl
-	//	<< "Average error = " << error / (depthMat->getRowsNum() * depthMat->getColsNum()) << " % " << std::endl;
+	MMatrix initMat = *depthMat;
+	//initMat.setBlock(1.0); // Just a test
+	//initMat.setBlock(0.0, std::make_tuple(1, -1, 1, -1)); // Just a test
+	
+	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy);
 
-	return iMat;
+	// Calculate error
+	double error = 0.0;
+	for (int i = 0; i < depthMat->getRowsNum(); i++)
+		for (int j = 0; j < depthMat->getColsNum(); j++)
+			error += (depthMat->getElement(i, j) - retMat.getElement(i, j)) / depthMat->getElement(i, j)*100;
+	std::cout << "Total error = " << error << " % " << std::endl
+		<< "Average error = " << error / (depthMat->getRowsNum() * depthMat->getColsNum()) << " % " << std::endl;
+
+	return retMat;
 }
 
 // Edge detection (matrix differentiation)

@@ -30,11 +30,6 @@ All the tone-mapping algorithms (as functions) are included in this file.
 #  define M_PI 3.1415926535897
 #endif
 
-// Define dype
-typedef std::tuple<uint, int, uint, int> Range2D; // Store range of rows and columns of a matrix
-typedef std::tuple<MMatrix, MMatrix, MMatrix> M3MatPtr; // 3 MMatrix tuple
-
-
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
 //------------------------------------------------------------------------------

@@ -7,18 +7,24 @@ Mathmatical Tool
 - Matrix Class
 - Vector Class
 - Generate pascal triangle
+
+\updated 01/15/2016
+- Type definitions
+
 */
 //==============================================================================
 
 #include <iostream>
+#include <tuple>
 #include <vector>
 //------------------------------------------------------------------------------
+
+// Ordinary type defination
 typedef unsigned int uint; // unsigned integer
 typedef std::vector<double> dbvector; // vector of double type
 typedef std::vector<double>::iterator dbiterator; // iterator of double type;
 typedef std::vector< std::vector< double > > dbmatrix; // matrix of double type
-
-													   
+typedef std::tuple<uint, int, uint, int> Range2D; // Store range of rows and columns of a matrix												   
 													   
 ///////////////////////////////////////////////////////////////////////////////
 // Matrix class
@@ -60,6 +66,9 @@ class MMatrix
 
 	// set element at i, j of a value
 	void setElement(uint i, uint j, double val);
+
+	// set a block from rInit to rEnd and cInit to cEnd with a value
+	void setBlock(double val, Range2D blockRange = std::make_tuple(0, 0, 0, 0));
 
 	// get value of element at i, j
 	double getElement(uint i, uint j);
@@ -194,3 +203,6 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 MVector pascalTriangle(size_t winSize, double initVal1, double initVal2);
+
+// Special class type defination
+typedef std::tuple<MMatrix, MMatrix, MMatrix> M3MatPtr; // 3 MMatrix tuple

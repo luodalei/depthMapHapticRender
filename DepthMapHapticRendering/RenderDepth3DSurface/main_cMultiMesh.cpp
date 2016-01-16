@@ -227,26 +227,17 @@ int main(int argc, char* argv[])
 	//int sigma = 4;
 	//mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
-	// 2. gradient
-	uint radius2 = 2; //
-	double thresh = 100;
-	double alpha = 5.0;
+	// 2. Gradient magnitude compression and bas relief
+	uint radius2 = 2; // (2)
+	double thresh = 1; // (100)
+	double alpha = 0.5; // (5.0)
 
-	// Test Poisson equation solver 
-	int L = 10;
-	MMatrix* V = new MMatrix(L, L, 0.0);
-	for (uint i = 0; i < L; i++)
-		for (uint j = 0; j < L; j++)
-			V->setElement(i, j, rand() % 10 + 1);
-	V->display();
-
-	mappedMatrix = basRelief(V, radius2, thresh, alpha);
+	mappedMatrix = basRelief(&depthMatrix, radius2, thresh, alpha);
 
 	//test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	// writeMatrix(&depthMatrix, "originalMap.txt");
-	// writeMatrix(&mappedMatrix, "modifedMap.txt");
+	writeMatrix(&mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
