@@ -206,14 +206,15 @@ int main(int argc, char* argv[])
 	// Importing image 
 	string imagePath0 = "../bin/resources/image/rabbit.png"; 
 	string imagePath1 = "../bin/resources/image/complexScene1.png";
-	string imagePath2 = "../bin/resources/image/ol_dm1.png";
-	string imagePath3 = "../bin/resources/image/ol_dm2.png";
-	string imagePath4 = "../bin/resources/image/ol_dm3.png";
-	string imagePath5 = "../bin/resources/image/ol_dm4.png";
+	string imagePath2 = "../bin/resources/image/ol_dm1.png"; // "museum"
+	string imagePath3 = "../bin/resources/image/ol_dm2.png"; // "street"
+	string imagePath4 = "../bin/resources/image/ol_dm3.png"; // "office"
+	string imagePath5 = "../bin/resources/image/ol_dm4.png"; // "garden"
+	string imagePath6 = "../bin/resources/image/scorpione.png"; // "scorpione"
 	uint imageSize[2];
 
 	// Load the depth matrix
-	loadImage(imagePath5, imageSize, &depthMatrix);
+	loadImage(imagePath6, imageSize, &depthMatrix);
 
 	MMatrix mappedMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);	
 
@@ -223,21 +224,21 @@ int main(int argc, char* argv[])
 	///////////////////////////////////////////////////////////////////////////
 
 	// 1. Gaussian filtering
-	//uint radius = 5;
-	//int sigma = 4;
-	//mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
+	uint radius = 2; // (5) changed 01 / 15 / 2016
+	int sigma = 4; // (4)
+	mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. Gradient magnitude compression and bas relief
 	uint radius2 = 2; // (2)
-	double thresh = 1; // (100)
-	double alpha = 0.5; // (5.0)
+	double thresh = 0.008; // (0.01)
+	double alpha = 1; // (5.0)
 
-	mappedMatrix = basRelief(&depthMatrix, radius2, thresh, alpha);
+	mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
 
 	//test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	writeMatrix(&mappedMatrix, "modifedMap.txt");
+	//writeMatrix(&mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
@@ -368,7 +369,7 @@ int main(int argc, char* argv[])
     world->addChild(object);
 
     // set the position of the object at the center of the world
-    object->setLocalPos(1.4, 0.0, 0.0); // Object shift by 1.0 on z direction
+    object->setLocalPos(1.0, 0.0, 0.0); // Object shift by 1.4 on z direction (1.4) changed 01/15/2016
 
     // Since we want to see our polygons from both sides, we disable culling.
     object->setUseCulling(false);
@@ -400,7 +401,7 @@ int main(int argc, char* argv[])
 
 	// scale the image to fit the world
 	double scaleXY = 1.0 / (double)largestSide;
-	double scaleZ = 1.0 / sizeZ;
+	double scaleZ = 0.2 / sizeZ; // (1.0) changed 01/15/2016
 
 	// we will create an triangle based object. For centering puposes we
 	// compute an offset for axis X and Y corresponding to the half size
