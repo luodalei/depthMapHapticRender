@@ -223,24 +223,24 @@ int main(int argc, char* argv[])
 	///////////////////////////////////////////////////////////////////////////
 
 	// 1. Gaussian filtering
-	uint radius = 5;
-	int sigma = 4;
-	mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
+	//uint radius = 5;
+	//int sigma = 4;
+	//mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. gradient
-	uint radius2 = 3; //
+	uint radius2 = 2; //
 	double thresh = 100;
-	double alpha = 1.0;
+	double alpha = 5.0;
 
-	// Test Poisson equation solver on 01/11/2016
-	/*int L = 5;
+	// Test Poisson equation solver 
+	int L = 10;
 	MMatrix* V = new MMatrix(L, L, 0.0);
 	for (uint i = 0; i < L; i++)
 		for (uint j = 0; j < L; j++)
 			V->setElement(i, j, rand() % 10 + 1);
-	V->display();*/
+	V->display();
 
-	mappedMatrix = basRelief(&depthMatrix, radius2, thresh, alpha);
+	mappedMatrix = basRelief(V, radius2, thresh, alpha);
 
 	//test();
 

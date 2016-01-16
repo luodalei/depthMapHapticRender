@@ -76,7 +76,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	// Select Kernel for matrix differeniation
 
 	// Sobel Kernel
-	MMatrix kernel = sobelKernel(2*radius+1);
+	//MMatrix kernel = sobelKernel(2*radius+1);
 
 	// Forward Difference Kernel (3-by-3)
 	MMatrix fwdKer(3, 3, 0.0);
@@ -93,48 +93,43 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	MMatrix diffY(0, 0);
 	MMatrix diffMag(0, 0);
 
-	std::tie(diffX, diffY, diffMag) = matrixDiff(depthMat, kernel, true);
+	std::tie(diffX, diffY, diffMag) = matrixDiff(depthMat, fwdKer, true);
 
 	//diffX = filter(depthMat, fwdKer, std::make_tuple(0, 0, 0, -1));
 	////diffX.display();
 	//diffY = filter(depthMat, ~fwdKer, std::make_tuple(0, -1, 0, 0));
 	////diffY.display();
-	writeMatrix(&diffX, "modifedMap.txt");
-
-	return diffX;
-
 	//diffMag = diffX.times(diffX) + diffY.times(diffY);
 	//diffMag.sqroot(); // $sqrt{ x^2 + y^2 }$
-
-	//diffX /= diffMag; // gradient direction x
-	//diffY /= diffMag; // gradient direction y
-
 
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
 	//compressed(&diffMag, thres, alpha);
 
 	// g' = s' $\times$ v'
-	//diffX.display();
-	//diffY.display();
+	diffX *= diffMag; // gradient direction x times amplitude
+	diffY *= diffMag; // gradient direction y times amplitude
+	diffX.display();
+	diffY.display();
+
 	// Integration  (Step III)
 
 	// Acquire map Backward Difference
-	//MMatrix divGx = filter(&diffX, bkdKer);
-	//MMatrix divGy = filter(&diffY, ~bkdKer);
-	////divGx.display();
-	////divGy.display();
-	//MMatrix divG = divGx + divGy;
-	//divG.display();
-	//writeMatrix(&diffX, "modifedMap.txt");
+	MMatrix divGx = filter(&diffX, bkdKer);
+	MMatrix divGy = filter(&diffY, ~bkdKer);
+	divGx.display();
+	divGy.display();
+	MMatrix divG = divGx + divGy;
+	divG.display();
+	writeMatrix(&divG, "modifedMap.txt");
 
-	//MMatrix initMat = *depthMat;
-	//std::cout << "Acquire Integration " << std::endl;
-	//MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
-	//iMat.display();
+	MMatrix initMat = *depthMat;
+	std::cout << "Acquire Integration " << std::endl;
+	MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
+	iMat.display();
 
-	//// Error
-	//std::cout << "Error " << std::endl;
-	//(iMat - (*depthMat)).display();
+	// Error
+	std::cout << "Error " << std::endl;
+	(iMat - (*depthMat)).display();
 
 	//MMatrix initMat = *depthMat;
 	//MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy);
@@ -147,7 +142,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	//std::cout << "Total error = " << error << " % " << std::endl
 	//	<< "Average error = " << error / (depthMat->getRowsNum() * depthMat->getColsNum()) << " % " << std::endl;
 
-	//return retMat;
+	return iMat;
 }
 
 // Edge detection (matrix differentiation)
@@ -237,18 +232,18 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 	int rInit, rEnd, cInit, cEnd;
 
 	// Optional argument: filter range
-	//if ((std::get<0>(filtRange) == 0) && (std::get<1>(filtRange) == 0) &&
-	//	(std::get<2>(filtRange) == 0) && (std::get<3>(filtRange) == 0) )
-	//{
-	//	std::cout << "Filtering entire matrix" << std::endl;
+	if ((std::get<0>(filtRange) == 0) && (std::get<1>(filtRange) == 0) &&
+		(std::get<2>(filtRange) == 0) && (std::get<3>(filtRange) == 0) )
+	{
+		std::cout << "Filtering entire matrix" << std::endl;
 		rInit = 0;
 		rEnd = height;
 		cInit = 0;
 		cEnd = width;
-	//}
-	//else
-	//{
-	/*	if (std::get<1>(filtRange) >= height)
+	}
+	else
+	{
+		if (std::get<1>(filtRange) >= height)
 		{
 			std::cerr << "Warning: 'rEnd' out of matrix boundary" << std::endl;
 			rEnd = height;
@@ -296,27 +291,28 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 		else
 		{
 			cInit = std::get<2>(filtRange);
-		}*/
+		}
 
 		std::cout << "Filtering in Row " << rInit << " to " << rEnd-1
 			<< " , Col " << cInit << " to " << cEnd-1 << std::endl;
-	//}
+	}
 
 	size_t kerLen = ker.getRowsNum();
 
 	int radius;
 	int mod; // Modify the range of kernel for odd or even sites
-	double deftWeightSum = 0; // default sum of kernel weight
+
+	//double deftWeightSum = 0; // default sum of kernel weight (REMOVED)
 
 	MMatrix mappedMat = *mat;
 
-	for (uint p = 0; p < kerLen; p++)
+	/*for (uint p = 0; p < kerLen; p++)
 	{
 		for (uint q = 0; q < kerLen; q++)
 		{
-			deftWeightSum += ker.getElement(p, q);
+			deftWeightSum += (ker.getElement(p, q));
 		}
-	}
+	}*/ // (REMOVED)
 
 	if (kerLen % 2 == 1) // If kernel side length is odd
 	{
@@ -338,7 +334,7 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 			int mEnd = radius + mod;
 			int nInit = -radius;
 			int nEnd = radius + mod;
-			double weightSum = 0; // current sum of kernel weight
+			//double weightSum = 0; // current sum of kernel weight  (REMOVED)
 
 			// if filter block exceed image boundary then truncate filter block
 			if (i < radius){ mInit = -i; }
@@ -354,22 +350,21 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 				{
 					// convolution
 					filtSum += mat->getElement(i + m, j + n) * ker.getElement(m + radius, n + radius);
-					weightSum += ker.getElement(m + radius, n + radius);
+					//weightSum += (ker.getElement(m + radius, n + radius));
 				}
 			}
 
-			if ((weightSum < deftWeightSum) && (deftWeightSum != 0) && (weightSum != 0))
-			{
-				// In case of kernel block being truncated
-				mappedMat.setElement(i, j, (filtSum * deftWeightSum / weightSum));
-			}
-			else
-			{
+			//if ((weightSum < deftWeightSum) && (weightSum != 0)) //  (REMOVED)
+			//{
+			//	// In case of kernel block being truncated
+			//	mappedMat.setElement(i, j, (filtSum * deftWeightSum / weightSum));
+			//}
+			//else // (REMOVED on 01/15/2016 due to \pm issues)
+			//{
 				mappedMat.setElement(i, j, filtSum);
-			}
+			//}
 		}
-	}
-	
+	}	
 	return mappedMat;
 }
 
