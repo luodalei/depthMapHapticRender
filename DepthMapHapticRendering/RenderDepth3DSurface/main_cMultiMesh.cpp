@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
 	//test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	//writeMatrix(&mappedMatrix, "modifedMap.txt");
+	writeMatrix(&mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================

@@ -71,7 +71,7 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.001; // Accuracy of integration approximation
+	double accuracy = 0.00001; // Accuracy of integration approximation
 
 	// Select Kernel for matrix differeniation
 
@@ -122,7 +122,6 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	//divGy.display();
 	MMatrix divG = divGx + divGy;
 	//divG.display();
-	//writeMatrix(&divG, "modifedMap.txt"); // Visualize (test) divG
 
 	//MMatrix initMat = *depthMat;
 	//std::cout << "Acquire Integration " << std::endl;
@@ -587,62 +586,66 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 ///////////////////////////////////////////////////////////////////////////////
 void test()
 {
-	// Test Poisson equation solver on 01/11/2016
-	int L = 20;
-	MMatrix* V = new MMatrix(L , L , 0.0);
-	for (uint i = 0; i < L; i++)
-		for (uint j = 0; j < L; j++)
-			V->setElement(i, j, rand()%10+1);
-	V->display();
 
-	//MMatrix kernel = sobelKernel(2 * 1 + 1);
-
-	// Forward Difference Kernel (3-by-3)
-	MMatrix fwdKer(3, 3, 0.0);
-	fwdKer.setElement(1, 1, 1);
-	fwdKer.setElement(1, 2, -1);
-
-	// Backward Difference Kernel (3-by-3)
-	MMatrix bkdKer(3, 3, 0.0);
-	bkdKer.setElement(1, 0, 1);
-	bkdKer.setElement(1, 1, -1);
-
-	// // Acquire map Forward Difference 
-	//MMatrix diffX = filter(V, fwdKer, std::make_tuple(0,0,0,-1));
-	////diffX.display();
-	//MMatrix diffY = filter(V, ~fwdKer, std::make_tuple(0, -1, 0, 0));
-	////diffY.display();
-
-	MMatrix diffX(L, L, 0.0);
-	MMatrix diffY(L, L, 0.0);
-	MMatrix diffMag(L, L, 0.0);
-
-	std::tie(diffX, diffY, diffMag) = matrixDiff(V, fwdKer, true);
-
-	// Gradient Compression (change only the gradient magnitude)  (Step II)
-	compressed(&diffMag, 100, 5.0);
-
-	// g' = s' $\times$ v'
-	diffX *= diffMag;
-	diffY *= diffMag;
-
-	// Acquire map Backward Difference 
-	std::cout << "Acquire map Backward Difference " << std::endl;
-	MMatrix divGx = filter(&diffX, bkdKer);
-	//divGx.display();
-	MMatrix divGy = filter(&diffY, ~bkdKer);
-	//divGy.display();
-	MMatrix divG = divGx + divGy;
-	//divG.mul( 0.9 );
-	divG.display();
-
-	// Acquire Integration
-	MMatrix initMat = *V;
-	std::cout << "Acquire Integration " << std::endl;
-	MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
-	iMat.display();
-
-	// Error
-	std::cout << "Error " << std::endl;
-	(iMat - (*V)).display();
 }
+//void test()
+//{
+//	// Test Poisson equation solver on 01/11/2016
+//	int L = 20;
+//	MMatrix* V = new MMatrix(L , L , 0.0);
+//	for (uint i = 0; i < L; i++)
+//		for (uint j = 0; j < L; j++)
+//			V->setElement(i, j, rand()%10+1);
+//	V->display();
+//
+//	//MMatrix kernel = sobelKernel(2 * 1 + 1);
+//
+//	// Forward Difference Kernel (3-by-3)
+//	MMatrix fwdKer(3, 3, 0.0);
+//	fwdKer.setElement(1, 1, 1);
+//	fwdKer.setElement(1, 2, -1);
+//
+//	// Backward Difference Kernel (3-by-3)
+//	MMatrix bkdKer(3, 3, 0.0);
+//	bkdKer.setElement(1, 0, 1);
+//	bkdKer.setElement(1, 1, -1);
+//
+//	// // Acquire map Forward Difference 
+//	//MMatrix diffX = filter(V, fwdKer, std::make_tuple(0,0,0,-1));
+//	////diffX.display();
+//	//MMatrix diffY = filter(V, ~fwdKer, std::make_tuple(0, -1, 0, 0));
+//	////diffY.display();
+//
+//	MMatrix diffX(L, L, 0.0);
+//	MMatrix diffY(L, L, 0.0);
+//	MMatrix diffMag(L, L, 0.0);
+//
+//	std::tie(diffX, diffY, diffMag) = matrixDiff(V, fwdKer, true);
+//
+//	// Gradient Compression (change only the gradient magnitude)  (Step II)
+//	compressed(&diffMag, 100, 5.0);
+//
+//	// g' = s' $\times$ v'
+//	diffX *= diffMag;
+//	diffY *= diffMag;
+//
+//	// Acquire map Backward Difference 
+//	std::cout << "Acquire map Backward Difference " << std::endl;
+//	MMatrix divGx = filter(&diffX, bkdKer);
+//	//divGx.display();
+//	MMatrix divGy = filter(&diffY, ~bkdKer);
+//	//divGy.display();
+//	MMatrix divG = divGx + divGy;
+//	//divG.mul( 0.9 );
+//	divG.display();
+//
+//	// Acquire Integration
+//	MMatrix initMat = *V;
+//	std::cout << "Acquire Integration " << std::endl;
+//	MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
+//	iMat.display();
+//
+//	// Error
+//	std::cout << "Error " << std::endl;
+//	(iMat - (*V)).display();
+//}
