@@ -43,6 +43,9 @@ void compressed(MMatrix* depthMat, double thres,  double alpha);
 /* Solving Poisson equation to estimate 2D integrals*/
 MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy);
 
+/* Gauss-Seidel method */
+void Gauss_Seidel(double h, MMatrix* V1, MMatrix* rho1);
+
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +74,7 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.00001; // Accuracy of integration approximation
+	double accuracy = 0.001; // (0.00001) Accuracy of integration approximation
 
 	// Select Kernel for matrix differeniation
 
@@ -486,59 +489,46 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 
 	while (continueItr)
 	{
-		///* Gauss-Seidel method */
-		//*V1_new = *V1;
-		//for (int i = 1; i <= height - 2; i++)
+		/* Gauss-Seidel method */
+		V1_new = *V1;
+		Gauss_Seidel(1.0, &V1_new, rho1);
+		/*for (int i = 1; i <= height - 2; i++)
+		{
+			for (int j = 1; j <= width - 2; j++)
+			{
+				V1_new.setElement(i, j, 0.25*(V1_new.getElement(i - 1, j) 
+					+ V1_new.getElement(i + 1, j)
+					+ V1_new.getElement(i, j - 1) 
+					+ V1_new.getElement(i, j + 1) - rho1->getElement(i, j)));
+			}
+		}*/
+
+		/* Successive Over Relaxation (SOR) method */
+		//for (uint i = 1; i <= height - 2; i++)
 		//{
-		//	for (int j = 1; j <= width - 2; j++)
+		//	for (uint j = 1; j <= width - 2; j++)
 		//	{
-		//		V1_new->setElement(i, j, 0.25*(V1_new->getElement(i - 1, j) 
-		//			+ V1_new->getElement(i + 1, j)
-		//			+ V1_new->getElement(i, j - 1) 
-		//			+ V1_new->getElement(i, j + 1) - rho1->getElement(i, j)));
+		//		if ((i + j) % 2 == 0) // Update even sites
+		//		{
+		//			V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+		//				+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+		//				+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+		//				- rho1->getElement(i, j)));
+		//		}
 		//	}
 		//}
 
-		/* Successive Over Relaxation (SOR) method */
-		for (uint i = 1; i <= height - 2; i++)
-		{
-			for (uint j = 1; j <= width - 2; j++)
-			{
-				if ((i + j) % 2 == 0) // Update even sites
-				{
-					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-						+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-						+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-						- rho1->getElement(i, j)));
-					//std::cout << (1 - omega) << " * " << V1->getElement(i, j) << " + " 
-					//	<< omega * 0.25
-					//	<< "* ( "
-					//	<< V1->getElement(i - 1, j) << " + "
-					//	<< V1->getElement(i + 1, j) << " + "
-					//	<< V1->getElement(i, j - 1) << " + "
-					//	<< V1->getElement(i, j + 1) << " - "
-					//	<< rho1->getElement(i, j) << " ) = "
-					//	<< (1 - omega) * V1->getElement(i, j)
-					//	+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-					//	+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-					//	- rho1->getElement(i, j))
-					//	<< std::endl;
-					//std::cout << " " << V1->getElement(i, j) << std::endl;
-				}
-			}
-		}
-
-		for (uint i = 1; i <= height - 2; i++)
-		{
-			for (uint j = 1; j <= width - 2; j++)
-			{
-				if ((i + j) % 2 != 0) // Update odd sites
-					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-					+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
-					+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
-					- rho1->getElement(i, j)));
-			}
-		}
+		//for (uint i = 1; i <= height - 2; i++)
+		//{
+		//	for (uint j = 1; j <= width - 2; j++)
+		//	{
+		//		if ((i + j) % 2 != 0) // Update odd sites
+		//			V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+		//			+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
+		//			+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
+		//			- rho1->getElement(i, j)));
+		//	}
+		//}
 
 		double error = 0;
 		int n = 0;
@@ -578,6 +568,24 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
 
 	return V1_new;
+}
+
+/* Gauss-Seidel method */
+void Gauss_Seidel(double h, MMatrix* V1, MMatrix* rho1)
+{	
+	size_t height = V1->getRowsNum();
+	size_t width = V1->getColsNum();	
+
+	for (int i = 1; i <= height - 2; i++)
+	{
+		for (int j = 1; j <= width - 2; j++)
+		{
+			V1->setElement(i, j, 0.25*(V1->getElement(i - 1, j)
+				+ V1->getElement(i + 1, j)
+				+ V1->getElement(i, j - 1)
+				+ V1->getElement(i, j + 1) - rho1->getElement(i, j)));
+		}
+	}
 }
 
 
@@ -648,4 +656,111 @@ void test()
 //	// Error
 //	std::cout << "Error " << std::endl;
 //	(iMat - (*V)).display();
+//}
+
+///////////////////////////////////////////////////////////////////////////////
+// Old Version FUNCTIONS
+///////////////////////////////////////////////////////////////////////////////
+/* Solving Poisson equation: \triangledown^2 V = \rho */
+/* Abandoned on 02/02/2016 */
+//MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
+//{
+//	size_t height = V1->getRowsNum();
+//	size_t width = V1->getColsNum();
+//
+//	MMatrix V1_new = *V1; // Updated matrix
+//
+//	clock_t t0 = clock(); // Initial time of the solver
+//
+//	int steps = 0; //  count iteration steps
+//	double omega = 2 / (1 + M_PI / sqrt(height*width)); // For SOR method only
+//	bool continueItr = true; // whether the iteration continues
+//
+//	std::cout << "Solving Equation ..." << std::endl;
+//
+//	while (continueItr)
+//	{
+//		/* Gauss-Seidel method */
+//		/*V1_new = *V1;
+//		Gauss_Seidel(1.0, &V1_new, rho1);*/
+//
+//		/* Successive Over Relaxation (SOR) method */
+//		for (uint i = 1; i <= height - 2; i++)
+//		{
+//			for (uint j = 1; j <= width - 2; j++)
+//			{
+//				if ((i + j) % 2 == 0) // Update even sites
+//				{
+//					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+//						+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+//						+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+//						- rho1->getElement(i, j)));
+//					//std::cout << (1 - omega) << " * " << V1->getElement(i, j) << " + " 
+//					//	<< omega * 0.25
+//					//	<< "* ( "
+//					//	<< V1->getElement(i - 1, j) << " + "
+//					//	<< V1->getElement(i + 1, j) << " + "
+//					//	<< V1->getElement(i, j - 1) << " + "
+//					//	<< V1->getElement(i, j + 1) << " - "
+//					//	<< rho1->getElement(i, j) << " ) = "
+//					//	<< (1 - omega) * V1->getElement(i, j)
+//					//	+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+//					//	+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+//					//	- rho1->getElement(i, j))
+//					//	<< std::endl;
+//					//std::cout << " " << V1->getElement(i, j) << std::endl;
+//				}
+//			}
+//		}
+//
+//		for (uint i = 1; i <= height - 2; i++)
+//		{
+//			for (uint j = 1; j <= width - 2; j++)
+//			{
+//				if ((i + j) % 2 != 0) // Update odd sites
+//					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+//					+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
+//					+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
+//					- rho1->getElement(i, j)));
+//			}
+//		}
+//
+//		double error = 0;
+//		int n = 0;
+//
+//		// Compute error
+//		for (int i = 1; i <= height - 2; i++)
+//		{
+//			for (int j = 1; j <= width - 2; j++)
+//			{
+//				double oldVal = V1->getElement(i, j);
+//				double newVal = V1_new.getElement(i, j);
+//				if (newVal != 0)
+//					if (newVal != oldVal)
+//					{
+//						error += abs(1 - oldVal / newVal);
+//						n++;
+//					}
+//			}
+//		}
+//		//std::cout << error << " , n = " << n << std::endl;
+//
+//		if (n != 0) error /= n;
+//
+//		if (error < accuracy)
+//		{
+//			continueItr = false;
+//		}
+//		else
+//		{
+//			*V1 = V1_new;
+//		}
+//
+//		steps++;
+//	}
+//
+//	std::cout << "Number of steps = " << steps << std::endl;
+//	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
+//
+//	return V1_new;
 //}
