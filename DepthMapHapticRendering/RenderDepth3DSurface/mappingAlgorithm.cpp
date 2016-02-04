@@ -44,7 +44,10 @@ void compressed(MMatrix* depthMat, double thres,  double alpha);
 MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy);
 
 /* Gauss-Seidel method */
-void Gauss_Seidel(double h, MMatrix* V1, MMatrix* rho1);
+void Gauss_Seidel(MMatrix* u1, MMatrix* r1);
+
+/* Successive Over Relaxation (SOR) method */
+void SOR(double omega, MMatrix* u1_new, MMatrix* r1);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
@@ -74,7 +77,7 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.001; // (0.00001) Accuracy of integration approximation
+	double accuracy = 0.00001; // (0.00001) Accuracy of integration approximation
 
 	// Select Kernel for matrix differeniation
 
@@ -490,45 +493,10 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 	while (continueItr)
 	{
 		/* Gauss-Seidel method */
-		V1_new = *V1;
-		Gauss_Seidel(1.0, &V1_new, rho1);
-		/*for (int i = 1; i <= height - 2; i++)
-		{
-			for (int j = 1; j <= width - 2; j++)
-			{
-				V1_new.setElement(i, j, 0.25*(V1_new.getElement(i - 1, j) 
-					+ V1_new.getElement(i + 1, j)
-					+ V1_new.getElement(i, j - 1) 
-					+ V1_new.getElement(i, j + 1) - rho1->getElement(i, j)));
-			}
-		}*/
+		//Gauss_Seidel(&V1_new, rho1);		
 
 		/* Successive Over Relaxation (SOR) method */
-		//for (uint i = 1; i <= height - 2; i++)
-		//{
-		//	for (uint j = 1; j <= width - 2; j++)
-		//	{
-		//		if ((i + j) % 2 == 0) // Update even sites
-		//		{
-		//			V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-		//				+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-		//				+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-		//				- rho1->getElement(i, j)));
-		//		}
-		//	}
-		//}
-
-		//for (uint i = 1; i <= height - 2; i++)
-		//{
-		//	for (uint j = 1; j <= width - 2; j++)
-		//	{
-		//		if ((i + j) % 2 != 0) // Update odd sites
-		//			V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-		//			+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
-		//			+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
-		//			- rho1->getElement(i, j)));
-		//	}
-		//}
+		SOR(omega, &V1_new, rho1);
 
 		double error = 0;
 		int n = 0;
@@ -556,10 +524,8 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 		{
 			continueItr = false;
 		}
-		else
-		{
-			*V1 = V1_new;
-		}
+
+		*V1 = V1_new;
 
 		steps++;
 	}
@@ -571,22 +537,56 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 }
 
 /* Gauss-Seidel method */
-void Gauss_Seidel(double h, MMatrix* V1, MMatrix* rho1)
+void Gauss_Seidel(MMatrix* u1, MMatrix* r1)
 {	
-	size_t height = V1->getRowsNum();
-	size_t width = V1->getColsNum();	
+	size_t height = u1->getRowsNum();
+	size_t width = u1->getColsNum();
 
 	for (int i = 1; i <= height - 2; i++)
 	{
 		for (int j = 1; j <= width - 2; j++)
 		{
-			V1->setElement(i, j, 0.25*(V1->getElement(i - 1, j)
-				+ V1->getElement(i + 1, j)
-				+ V1->getElement(i, j - 1)
-				+ V1->getElement(i, j + 1) - rho1->getElement(i, j)));
+			u1->setElement(i, j, 0.25*(u1->getElement(i - 1, j)
+				+ u1->getElement(i + 1, j)
+				+ u1->getElement(i, j - 1)
+				+ u1->getElement(i, j + 1) - r1->getElement(i, j)));
 		}
 	}
 }
+
+/* Successive Over Relaxation (SOR) method */
+void SOR(double omega, MMatrix* u1, MMatrix* r1)
+{
+	size_t height = u1->getRowsNum();
+	size_t width = u1->getColsNum();
+
+	for (uint i = 1; i <= height - 2; i++)
+	{
+		for (uint j = 1; j <= width - 2; j++)
+		{
+			if ((i + j) % 2 == 0) // Update even sites
+			{
+				u1->setElement(i, j, (1 - omega) * u1->getElement(i, j)
+					+ omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
+						+ u1->getElement(i, j - 1) + u1->getElement(i, j + 1)
+						- r1->getElement(i, j)));
+			}
+		}
+	}
+
+	for (uint i = 1; i <= height - 2; i++)
+	{
+		for (uint j = 1; j <= width - 2; j++)
+		{
+			if ((i + j) % 2 != 0) // Update odd sites
+				u1->setElement(i, j, (1 - omega) * u1->getElement(i, j)
+					+ omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
+						+ u1->getElement(i, j - 1) + u1->getElement(i, j + 1)
+						- r1->getElement(i, j)));
+		}
+	}
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
