@@ -710,12 +710,12 @@ void test()
 	// Test Poisson equation solver on 02/04/2016
 	double accuracy = 0.001;
 	uint smoothNumber = 5;
-	uint L = 15;
-	uint H = 9;
+	uint L = 50;
+	uint H = 50;
 
 	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
 	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
-	rho->setElement(5, 8, 20.0);
+	rho->setElement(26, 26, 10.0);
 
 	/*for (uint i = 0; i < H; i++)
 		for (uint j = 0; j < L; j++)
