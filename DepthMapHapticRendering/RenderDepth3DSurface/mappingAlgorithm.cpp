@@ -41,13 +41,16 @@ MMatrix threshold(MMatrix* depthMat, double thres);
 void compressed(MMatrix* depthMat, double thres,  double alpha);
 
 /* Solving Poisson equation to estimate 2D integrals*/
-MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy);
+MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum);
 
 /* Gauss-Seidel method */
 void Gauss_Seidel(MMatrix* u1, MMatrix* r1);
 
 /* Successive Over Relaxation (SOR) method */
-void SOR(double omega, MMatrix* u1_new, MMatrix* r1);
+void SOR(double* omega, MMatrix* u1_new, MMatrix* r1);
+
+/*  Subroutine of recursion of the multigrid method  */
+void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
@@ -77,7 +80,9 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.00001; // (0.00001) Accuracy of integration approximation
+	double accuracy = 0.001; // (0.00001) Accuracy of integration approximation
+
+	uint smoothNumber = 5; // Number of smoothing before and after each multigrid recursion
 
 	// Select Kernel for matrix differeniation
 
@@ -141,12 +146,12 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	//initMat.setBlock(1.0); // Just a test
 	//initMat.setBlock(0.0, std::make_tuple(1, -1, 1, -1)); // Just a test
 	
-	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy);
+	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
 
 	// Calculate error
 	double error = 0.0;
-	for (int i = 0; i < depthMat->getRowsNum(); i++)
-		for (int j = 0; j < depthMat->getColsNum(); j++)
+	for (uint i = 0; i < depthMat->getRowsNum(); i++)
+		for (uint j = 0; j < depthMat->getColsNum(); j++)
 			error += (depthMat->getElement(i, j) - retMat.getElement(i, j)) / depthMat->getElement(i, j)*100;
 	std::cout << "Total error = " << error << " % " << std::endl
 		<< "Average error = " << error / (depthMat->getRowsNum() * depthMat->getColsNum()) << " % " << std::endl;
@@ -380,7 +385,7 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 /* Construct gaussian filter kernel block */
 MMatrix gaussianKernel(uint radius, int sigma)
 {
-	size_t kerLen = 2 * radius + 1; // kerLen * kerLen square matrix
+	int kerLen = 2 * radius + 1; // kerLen * kerLen square matrix
 	double sigma2 = 2 * sigma * sigma; // gaussian parameter sigma
 
 	int mu = (kerLen - 1) / 2; // zero mean 
@@ -391,10 +396,10 @@ MMatrix gaussianKernel(uint radius, int sigma)
 
 	//ker = new double*[kerLen];
 
-	for (int i = 0; i < kerLen; i++)
+	for (int i = 0; i < kerLen; i++) // i can be negative
 	{
 		//ker[i] = new double[kerLen];
-		for (int j = 0; j < kerLen; j++)
+		for (int j = 0; j < kerLen; j++) // j can be negative
 		{
 			// The formula: kernel weight = e^{ -( ((i- \mu)^2+(j-\mu)^2) )/( 2* \sigma^2 )}
 			ker.setElement(i, j, (exp(-((i - mu)*(i - mu) + (j - mu)*(j - mu)) / sigma2)) );
@@ -405,9 +410,9 @@ MMatrix gaussianKernel(uint radius, int sigma)
 
 	ker.div(kerSum);
 
-	for (uint i = 0; i < kerLen; i++)
+	for (int i = 0; i < kerLen; i++)
 	{
-		for (uint j = 0; j < kerLen; j++)
+		for (int j = 0; j < kerLen; j++)
 		{
 			ker.setElement(i, j,  (floor(ker.getElement(i, j) * 1000000.0) / 1000000.0) );
 			//cout << ker[i][j] << " "; // for test only
@@ -475,12 +480,35 @@ void compressed(MMatrix* depthMat, double thres, double alpha)
 }
 
 /* Solving Poisson equation: \triangledown^2 V = \rho */
-MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
+/* Multigrid Method */
+MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum)
 {
 	size_t height = V1->getRowsNum();
 	size_t width = V1->getColsNum();
 
-	MMatrix V1_new = *V1; // Updated matrix
+	// Wrap the matrix (V1) with a square matrix (sV) with length equal to power of 2
+	size_t mLength = (height > width) ? height : width;
+	uint powTwo = 1;
+	while (powTwo + 2 < mLength) // Number of interior points + two outliers
+	{
+		powTwo *= 2;
+	}
+	mLength = powTwo + 2;
+	std::cout << "mLength = " << mLength << std::endl;
+
+	MMatrix sV(mLength, mLength, 0.0); // Squared
+	MMatrix sRho = sV; // Squared
+	// Fill the upper left part of the square matrix with the input matrix
+	for (uint i = 0; i <= height - 1; i++)
+	{
+		for (uint j = 0; j <= width - 1; j++)
+		{
+			sV.setElement(i, j, V1->getElement(i, j));
+			sRho.setElement(i, j, rho1->getElement(i, j));
+		}
+	}
+
+	MMatrix sV_new = sV; // Update matrix
 
 	clock_t t0 = clock(); // Initial time of the solver
 
@@ -490,24 +518,22 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 
 	std::cout << "Solving Equation ..." << std::endl;
 
+	/* Start Iteration */
 	while (continueItr)
 	{
-		/* Gauss-Seidel method */
-		//Gauss_Seidel(&V1_new, rho1);		
-
-		/* Successive Over Relaxation (SOR) method */
-		SOR(omega, &V1_new, rho1);
+		/*  Recursion of the multigrid method  */
+		twoGrid(&soomthNum, &sV_new, &sRho, &omega);
 
 		double error = 0;
-		int n = 0;
+		uint n = 0;
 
 		// Compute error
-		for (int i = 1; i <= height - 2; i++)
+		for (uint i = 1; i <= height - 2; i++)
 		{
-			for (int j = 1; j <= width - 2; j++)
+			for (uint j = 1; j <= width - 2; j++)
 			{
-				double oldVal = V1->getElement(i, j);
-				double newVal = V1_new.getElement(i, j);
+				double oldVal = sV.getElement(i, j);
+				double newVal = sV_new.getElement(i, j);
 				if (newVal != 0)
 					if (newVal != oldVal)
 					{
@@ -520,12 +546,12 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 
 		if (n != 0) error /= n;
 
-		if (error < accuracy)
+		if ( (steps > 1) && (error < accuracy) )
 		{
 			continueItr = false;
 		}
 
-		*V1 = V1_new;
+		sV = sV_new;
 
 		steps++;
 	}
@@ -533,7 +559,17 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
 	std::cout << "Number of steps = " << steps << std::endl;
 	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
 
-	return V1_new;
+	// Crop the resulted square matrix to original size and discard extended parts.
+	MMatrix retMat(height, width);
+	for (uint i = 0; i <= height - 1; i++)
+	{
+		for (uint j = 0; j <= width - 1; j++)
+		{
+			retMat.setElement(i, j, sV_new.getElement(i, j));
+		}
+	}
+
+	return retMat;
 }
 
 /* Gauss-Seidel method */
@@ -542,9 +578,9 @@ void Gauss_Seidel(MMatrix* u1, MMatrix* r1)
 	size_t height = u1->getRowsNum();
 	size_t width = u1->getColsNum();
 
-	for (int i = 1; i <= height - 2; i++)
+	for (uint i = 1; i <= height - 2; i++)
 	{
-		for (int j = 1; j <= width - 2; j++)
+		for (uint j = 1; j <= width - 2; j++)
 		{
 			u1->setElement(i, j, 0.25*(u1->getElement(i - 1, j)
 				+ u1->getElement(i + 1, j)
@@ -555,38 +591,115 @@ void Gauss_Seidel(MMatrix* u1, MMatrix* r1)
 }
 
 /* Successive Over Relaxation (SOR) method */
-void SOR(double omega, MMatrix* u1, MMatrix* r1)
+void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 {
 	size_t height = u1->getRowsNum();
 	size_t width = u1->getColsNum();
 
-	for (uint i = 1; i <= height - 2; i++)
+	for (uint i = 1; i <= height - 2; i++) // Interior points only
 	{
-		for (uint j = 1; j <= width - 2; j++)
+		for (uint j = 1; j <= width - 2; j++) // Interior points only
 		{
 			if ((i + j) % 2 == 0) // Update even sites
 			{
-				u1->setElement(i, j, (1 - omega) * u1->getElement(i, j)
-					+ omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
+				u1->setElement(i, j, (1 - *omega) * u1->getElement(i, j)
+					+ *omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
 						+ u1->getElement(i, j - 1) + u1->getElement(i, j + 1)
 						- r1->getElement(i, j)));
 			}
 		}
 	}
 
-	for (uint i = 1; i <= height - 2; i++)
+	for (uint i = 1; i <= height - 2; i++) // Interior points only
 	{
-		for (uint j = 1; j <= width - 2; j++)
+		for (uint j = 1; j <= width - 2; j++) // Interior points only
 		{
 			if ((i + j) % 2 != 0) // Update odd sites
-				u1->setElement(i, j, (1 - omega) * u1->getElement(i, j)
-					+ omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
+				u1->setElement(i, j, (1 - *omega) * u1->getElement(i, j)
+					+ *omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
 						+ u1->getElement(i, j - 1) + u1->getElement(i, j + 1)
 						- r1->getElement(i, j)));
 		}
 	}
 }
 
+/*  Subroutine of recursion of the multigrid method  */
+void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
+{
+	// Length of current square matrix (fine grid) containing interior points only
+	size_t inLength = u1->getRowsNum() - 2;
+
+	// State when one interior point left (+ two outliers)
+	if (inLength == 1)
+	{
+		u1->setElement(1, 1, 0.25 * (u1->getElement(0, 1) + u1->getElement(2, 1)
+			+ u1->getElement(1, 0) + u1->getElement(1, 2) - r1->getElement(1, 1) ) );
+		return; // Going back to call function
+	}
+
+	// Pre-smoothing using SOR method
+	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1); }
+
+	// Compute the residual (fine grid)
+	MMatrix fineGrid(inLength + 2, inLength + 2);  // Number of interior points + two outliers	
+	for (uint i = 1; i <= inLength; i++) // Interior points only
+	{
+		for (uint j = 1; j <= inLength; j++) // Interior points only
+		{
+			fineGrid.setElement(i, j, u1->getElement(i + 1, j) + u1->getElement(i - 1, j)
+				+ u1->getElement(i, j + 1) + u1->getElement(i, j - 1) 
+				- 4 * u1->getElement(i, j) - r1->getElement(i, j));
+		}
+	}
+
+	// Length of coarse grid = half of the length of fine grid
+	uint coarLength = inLength / 2;
+
+	// Compute the residual (coarse grid)
+	MMatrix coarseGrid(coarLength + 2, coarLength + 2);  // Number of coarse points + two outliers	
+	for (uint m = 1; m <= coarLength; m++) // Coarse points only
+	{
+		uint i = 2 * m - 1;
+		for (uint n = 1; n <= coarLength; n++) // Coarse points only
+		{
+			uint j = 2 * n - 1;
+			coarseGrid.setElement(m, n, 0.25 * ( fineGrid.getElement(i, j) 
+				+ fineGrid.getElement(i + 1, j) + fineGrid.getElement(i, j + 1) 
+				+ fineGrid.getElement(i + 1, j + 1) ));
+		}
+	}
+
+	// Initialize a correction on coarse grid
+	MMatrix correction(coarLength + 2, coarLength + 2);
+
+	// ---------------------------------- Going in -----------------------------------
+
+	// Recursion
+	twoGrid(smoothN, &correction, &coarseGrid, omega);
+
+	// ---------------------------------- Going out ----------------------------------
+
+	// Prolongate correction (coarse) to fine grid
+	//MMatrix fineGrid(inLength + 2, inLength + 2);  	
+	for (uint m = 1; m <= coarLength; m++) // Coarse points only
+	{
+		uint i = 2 * m - 1;
+		for (uint n = 1; n <= coarLength; n++) // Coarse points only
+		{
+			uint j = 2 * n - 1;
+			fineGrid.setElement(i, j, coarseGrid.getElement(m, n));
+			fineGrid.setElement(i + 1, j, coarseGrid.getElement(m, n));
+			fineGrid.setElement(i, j + 1, coarseGrid.getElement(m, n));
+			fineGrid.setElement(i + 1, j + 1, coarseGrid.getElement(m, n));
+		}
+	}
+
+	// Correct u1
+	*u1 = fineGrid;
+
+	// Post-smoothing using SOR method
+	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1); }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -594,7 +707,31 @@ void SOR(double omega, MMatrix* u1, MMatrix* r1)
 ///////////////////////////////////////////////////////////////////////////////
 void test()
 {
+	// Test Poisson equation solver on 02/04/2016
+	double accuracy = 0.001;
+	uint smoothNumber = 5;
+	uint L = 15;
+	uint H = 9;
 
+	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
+	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
+	rho->setElement(5, 8, 20.0);
+
+	/*for (uint i = 0; i < H; i++)
+		for (uint j = 0; j < L; j++)
+			V->setElement(i, j, rand()%10+1);
+	V->display();*/
+
+	MMatrix resMat = IntgralSolver(V, rho, accuracy, smoothNumber);
+
+	writeMatrix(&resMat, "modifedMap.txt");
+
+	resMat.display();
+
+	delete V;
+	delete rho;
+
+	int aaaa = 0;
 }
 //void test()
 //{

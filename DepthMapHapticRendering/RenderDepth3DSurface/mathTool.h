@@ -24,7 +24,7 @@ typedef unsigned int uint; // unsigned integer
 typedef std::vector<double> dbvector; // vector of double type
 typedef std::vector<double>::iterator dbiterator; // iterator of double type;
 typedef std::vector< std::vector< double > > dbmatrix; // matrix of double type
-typedef std::tuple<uint, int, uint, int> Range2D; // Store range of rows and columns of a matrix												   
+typedef std::tuple<int, int, int, int> Range2D; // Store range of rows and columns of a matrix												   
 													   
 ///////////////////////////////////////////////////////////////////////////////
 // Matrix class

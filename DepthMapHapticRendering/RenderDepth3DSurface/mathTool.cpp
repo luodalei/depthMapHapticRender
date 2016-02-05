@@ -313,9 +313,9 @@ void MMatrix::setBlock(double val, Range2D blockRange)
 		cInit = std::get<2>(blockRange);
 	}
 
-	for (uint i = rInit; i < rEnd; i++)
+	for (int i = rInit; i < rEnd; i++)
 	{
-		for (uint j = cInit; j < cEnd; j++)
+		for (int j = cInit; j < cEnd; j++)
 		{
 			this->mMat[i][j] = val;
 		}
