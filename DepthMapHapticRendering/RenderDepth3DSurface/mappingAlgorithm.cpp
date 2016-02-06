@@ -222,13 +222,18 @@ void writeMatrix(MMatrix* mat, std::string filename)
 
 	std::ofstream outFile;
 	outFile.open(filename);
+
+	// Write in ".csv" format
 	for (uint i = 0; i < height; i++)
 	{
 		for (uint j = 0; j < width; j++)
 		{
-			outFile << mat->getElement(i, j) << " ";
+			if (j > 0) outFile << ",";
+			outFile << mat->getElement(i, j);
+			//outFile << mat->getElement(i, j) << ", ";
 		}
-		outFile << std::endl;
+	
+		outFile << "\n";
 	}
 	outFile.close();
 }
