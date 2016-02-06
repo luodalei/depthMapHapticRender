@@ -32,7 +32,7 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange = std::make_tuple(0,
 MMatrix gaussianKernel(uint radius, int sigma);
 
 /* Construct sobel filter kernel block */
-MMatrix sobelKernel(size_t winSize);
+MMatrix sobelKernel(uint winSize);
 
 /* Threshold filter */
 MMatrix threshold(MMatrix* depthMat, double thres);
@@ -57,7 +57,7 @@ void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
 
-double breakT = 120.0; // Maximum runing time (sec)
+double breakT = 20.0; // Maximum runing time (sec)
 
 MVector err1(2); // Recording conversion errors (Debug only)
 MVector err2(2); // Recording conversion errors (Debug only)
@@ -87,7 +87,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
 	double accuracy = 0.001; // (0.00001) Accuracy of integration approximation
 
-	uint smoothNumber = 5; // Number of smoothing before and after each multigrid recursion
+	uint smoothNumber = 2; // Number of smoothing before and after each multigrid recursion
 
 	// Select Kernel for matrix differeniation
 
@@ -121,37 +121,38 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
 	compressed(&diffMag, thres, alpha);
 
-	writeMatrix(&diffMag, "modifedMap2.txt");
+	//writeMatrix(&diffMag, "modifedMap2.txt");
 
 	// g' = s' $\times$ v'
 	diffX *= diffMag; // gradient direction x times amplitude
 	diffY *= diffMag; // gradient direction y times amplitude
-	//diffX.display();
-	//diffY.display();
 
 	// Integration  (Step III)
 
 	// Acquire map Backward Difference
 	MMatrix divGx = filter(&diffX, bkdKer);
 	MMatrix divGy = filter(&diffY, ~bkdKer);
-	//divGx.display();
-	//divGy.display();
+
 	MMatrix divG = divGx + divGy;
 	//divG.display();
 
-	//MMatrix initMat = *depthMat;
-	//std::cout << "Acquire Integration " << std::endl;
-	//MMatrix iMat = IntgralSolver(&initMat, &divG, 0.01);
-	//iMat.display();
-	// Error (display all)
-	//std::cout << "Error " << std::endl;
-	//(iMat - (*depthMat)).display();
-
 	MMatrix initMat = *depthMat;
-	//initMat.setBlock(1.0); // Just a test
 	//initMat.setBlock(0.0, std::make_tuple(1, -1, 1, -1)); // Just a test
-	
+
+	///////////////////////////////// Compare Algorithms ////////////////////////////////////
+	/*MMatrix retMat2 = IntgralSolver2(&initMat, &divG, accuracy, smoothNumber);
+	writeMatrix(&retMat2, "modifedMap2.txt");
+	writeMatrix(&err2, "err2.txt");*/
+
+	/*initMat = *depthMat;
+	divG = divGx + divGy;*/
+
 	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
+	writeMatrix(&retMat, "modifedMap.txt");
+	writeMatrix(&err1, "err1.txt");
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	//MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
 
 	// Calculate error
 	double error = 0.0;
@@ -204,8 +205,8 @@ void readMatrix(MMatrix* mat, std::string filepath)
 	std::ifstream inFile;
 	std::string str;
 
-	size_t height = mat->getRowsNum();
-	size_t width = mat->getColsNum();
+	uint height = mat->getRowsNum();
+	uint width = mat->getColsNum();
 
 	inFile.open(filepath);
 	for (uint i = 0; i < height; i++)
@@ -222,8 +223,8 @@ void readMatrix(MMatrix* mat, std::string filepath)
 /* Export the mapped image to a .txt file */
 void writeMatrix(MMatrix* mat, std::string filename)
 {
-	size_t height = mat->getRowsNum();
-	size_t width = mat->getColsNum();
+	uint height = mat->getRowsNum();
+	uint width = mat->getColsNum();
 
 	std::ofstream outFile;
 	outFile.open(filename);
@@ -321,7 +322,7 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 			<< " , Col " << cInit << " to " << cEnd-1 << std::endl;
 	}
 
-	size_t kerLen = ker.getRowsNum();
+	uint kerLen = ker.getRowsNum();
 
 	int radius;
 	int mod; // Modify the range of kernel for odd or even sites
@@ -435,7 +436,7 @@ MMatrix gaussianKernel(uint radius, int sigma)
 }
 
 /* Construct sobel filter kernel block (x direction) */
-MMatrix sobelKernel(size_t winSize)
+MMatrix sobelKernel(uint winSize)
 {
 	// Construct a smooth operater (row vector)
 	MVector smoothOperator = pascalTriangle(winSize, 1.0, 1.0);
@@ -493,11 +494,11 @@ void compressed(MMatrix* depthMat, double thres, double alpha)
 /* Multigrid Method */
 MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum)
 {
-	size_t height = V1->getRowsNum();
-	size_t width = V1->getColsNum();
+	uint height = V1->getRowsNum();
+	uint width = V1->getColsNum();
 
 	// Wrap the matrix (V1) with a square matrix (sV) with length equal to power of 2
-	size_t mLength = (height > width) ? height : width;
+	uint mLength = (height > width) ? height : width;
 	uint powTwo = 1;
 	while (powTwo + 2 < mLength) // Number of interior points + two outliers
 	{
@@ -527,6 +528,8 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 	bool continueItr = true; // whether the iteration continues
 
 	std::cout << "Solving Equation ..." << std::endl;
+
+	double errRecord = 1; // To prevent error increase
 
 	/* Start Iteration */
 	while (continueItr)
@@ -568,7 +571,19 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 		{
 			continueItr = false;
 		}
-		else if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // Break if exceed limited time
+
+		// Prevent error increase
+		/*if (error >= errRecord)
+		{
+			sV_new = sV;
+			continueItr = false;
+		}
+		else
+		{
+			errRecord = error;
+		}*/
+
+		if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // Break if exceed limited time
 		{
 			continueItr = false;
 		}
@@ -596,8 +611,8 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 /* Gauss-Seidel method */
 void Gauss_Seidel(MMatrix* u1, MMatrix* r1)
 {	
-	size_t height = u1->getRowsNum();
-	size_t width = u1->getColsNum();
+	uint height = u1->getRowsNum();
+	uint width = u1->getColsNum();
 
 	for (uint i = 1; i <= height - 2; i++)
 	{
@@ -614,8 +629,8 @@ void Gauss_Seidel(MMatrix* u1, MMatrix* r1)
 /* Successive Over Relaxation (SOR) method */
 void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 {
-	size_t height = u1->getRowsNum();
-	size_t width = u1->getColsNum();
+	uint height = u1->getRowsNum();
+	uint width = u1->getColsNum();
 
 	for (uint i = 1; i <= height - 2; i++) // Interior points only
 	{
@@ -648,7 +663,7 @@ void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 {
 	// Length of current square matrix (fine grid) containing interior points only
-	size_t inLength = u1->getRowsNum() - 2;
+	uint inLength = u1->getRowsNum() - 2;
 
 	// State when only one interior point left (+ two outliers)
 	if (inLength == 1)
@@ -730,9 +745,9 @@ void test()
 {
 	// Test Poisson equation solver on 02/04/2016
 	double accuracy = 0.001;
-	uint smoothNumber = 2;
-	uint L = 512;
-	uint H = 512;
+	uint smoothNumber = 5;
+	uint L = 500;
+	uint H = 300;
 
 	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
 	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
@@ -823,8 +838,8 @@ void test()
 /* Abandoned on 02/02/2016 */
 MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum)
 {
-	size_t height = V1->getRowsNum();
-	size_t width = V1->getColsNum();
+	uint height = V1->getRowsNum();
+	uint width = V1->getColsNum();
 
 	MMatrix V1_new = *V1; // Updated matrix
 
