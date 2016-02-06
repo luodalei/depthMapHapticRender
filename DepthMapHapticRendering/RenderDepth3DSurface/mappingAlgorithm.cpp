@@ -51,12 +51,16 @@ void Gauss_Seidel(MMatrix* u1, MMatrix* r1);
 void SOR(double* omega, MMatrix* u1_new, MMatrix* r1);
 
 /*  Subroutine of recursion of the multigrid method  */
-void twoGrid(double stepSize, uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
+void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
 
+double breakT = 120.0; // Maximum runing time (sec)
+
+MVector err1(2); // Recording conversion errors (Debug only)
+MVector err2(2); // Recording conversion errors (Debug only)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Algorithm 1 : Adjust depth intensity + Gaussian Blur
@@ -117,7 +121,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
 	compressed(&diffMag, thres, alpha);
 
-	writeMatrix(&diffMag, "modifedMap.txt");
+	writeMatrix(&diffMag, "modifedMap2.txt");
 
 	// g' = s' $\times$ v'
 	diffX *= diffMag; // gradient direction x times amplitude
@@ -530,7 +534,7 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 		sV = sV_new;
 
 		/*  Recursion of the multigrid method  */
-		twoGrid(1.0, &soomthNum, &sV_new, &sRho, &omega);
+		twoGrid(&soomthNum, &sV_new, &sRho, &omega);
 
 		double error = 0;
 		uint n = 0;
@@ -543,23 +547,34 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 				double oldVal = sV.getElement(i, j);
 				double newVal = sV_new.getElement(i, j);
 				if (newVal != 0)
+				{
 					if (newVal != oldVal)
 					{
-						error += abs(1 - newVal / oldVal);
+						error += abs(1 - oldVal / newVal);
 						n++;
 					}
+				}	
 			}
 		}
 		// std::cout << error << " , n = " << n << std::endl;
 
 		if (n != 0) error /= n;
 
+		//  Debug only
+		err1.append(error);
+		err1.append(double(clock() - t0) / CLOCKS_PER_SEC);
+
 		if ( (steps > 1) && (error < accuracy) )
 		{
 			continueItr = false;
 		}
+		else if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // Break if exceed limited time
+		{
+			continueItr = false;
+		}
 
-		steps++;
+		//steps++;
+		steps += ( 2 * soomthNum + log2(powTwo) );
 	}
 
 	std::cout << "Number of steps = " << steps << std::endl;
@@ -630,7 +645,7 @@ void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 }
 
 /*  Subroutine of recursion of the multigrid method  */
-void twoGrid(double stepSize, uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
+void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 {
 	// Length of current square matrix (fine grid) containing interior points only
 	size_t inLength = u1->getRowsNum() - 2;
@@ -639,7 +654,7 @@ void twoGrid(double stepSize, uint* smoothN, MMatrix* u1, MMatrix* r1, double* o
 	if (inLength == 1)
 	{
 		u1->setElement(1, 1, 0.25 * (u1->getElement(0, 1) + u1->getElement(2, 1)
-			+ u1->getElement(1, 0) + u1->getElement(1, 2) - stepSize * stepSize * r1->getElement(1, 1)));
+			+ u1->getElement(1, 0) + u1->getElement(1, 2) - r1->getElement(1, 1)));
 		return; // Going back to call function
 	}
 
@@ -654,7 +669,7 @@ void twoGrid(double stepSize, uint* smoothN, MMatrix* u1, MMatrix* r1, double* o
 		{
 			fineGrid.setElement(i, j, (u1->getElement(i + 1, j) + u1->getElement(i - 1, j)
 				+ u1->getElement(i, j + 1) + u1->getElement(i, j - 1) 
-				- 4 * u1->getElement(i, j)) / (stepSize * stepSize) - r1->getElement(i, j));
+				- 4 * u1->getElement(i, j)) - r1->getElement(i, j));
 		}
 	}
 
@@ -681,7 +696,7 @@ void twoGrid(double stepSize, uint* smoothN, MMatrix* u1, MMatrix* r1, double* o
 	// ---------------------------------- Going in -----------------------------------
 
 	// Recursion
-	twoGrid(2 * stepSize, smoothN, &correction, &coarseGrid, omega);
+	twoGrid(smoothN, &correction, &coarseGrid, omega);
 
 	// ---------------------------------- Going out ----------------------------------
 
@@ -714,27 +729,27 @@ void twoGrid(double stepSize, uint* smoothN, MMatrix* u1, MMatrix* r1, double* o
 void test()
 {
 	// Test Poisson equation solver on 02/04/2016
-	double accuracy = 0.0000001;
-	uint smoothNumber = 10;
-	uint L = 100;
-	uint H = 100;
+	double accuracy = 0.001;
+	uint smoothNumber = 2;
+	uint L = 512;
+	uint H = 512;
 
 	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
 	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
-	rho->setElement(51, 51, 10.0);
 
-	/*for (uint i = 0; i < H; i++)
-		for (uint j = 0; j < L; j++)
-			V->setElement(i, j, rand()%10+1);
-	V->display();*/
-
-	MMatrix resMat = IntgralSolver(V, rho, accuracy, smoothNumber);
-
-	writeMatrix(&resMat, "modifedMap.txt");
+	//rho->setElement(51, 51, 10.0);
+	for (uint i = 0; i < H+2; i++)
+		for (uint j = 0; j < L+2; j++)
+			rho->setElement(i, j, rand()%10+1);
+	//rho->display();
 
 	MMatrix resMat2 = IntgralSolver2(V, rho, accuracy, smoothNumber);
-
 	writeMatrix(&resMat2, "modifedMap2.txt");
+	writeMatrix(&err2, "err2.txt");
+
+	MMatrix resMat = IntgralSolver(V, rho, accuracy, smoothNumber);
+	writeMatrix(&resMat, "modifedMap.txt");	
+	writeMatrix(&err1, "err1.txt");
 
 	delete V;
 	delete rho;
@@ -890,6 +905,10 @@ MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthN
 
 		if (n != 0) error /= n;
 
+		//  Debug only
+		err2.append(error);
+		err2.append(double(clock() - t0) / CLOCKS_PER_SEC);
+
 		if (error < accuracy)
 		{
 			continueItr = false;
@@ -904,6 +923,9 @@ MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthN
 
 	std::cout << "Number of steps = " << steps << std::endl;
 	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
+
+	// Debug only
+	breakT = double(clock() - t0) / CLOCKS_PER_SEC;
 
 	return V1_new;
 }
