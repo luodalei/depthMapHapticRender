@@ -42,6 +42,7 @@ void compressed(MMatrix* depthMat, double thres,  double alpha);
 
 /* Solving Poisson equation to estimate 2D integrals*/
 MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum);
+MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum); // For compaison only
 
 /* Gauss-Seidel method */
 void Gauss_Seidel(MMatrix* u1, MMatrix* r1);
@@ -50,7 +51,7 @@ void Gauss_Seidel(MMatrix* u1, MMatrix* r1);
 void SOR(double* omega, MMatrix* u1_new, MMatrix* r1);
 
 /*  Subroutine of recursion of the multigrid method  */
-void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
+void twoGrid(double stepSize, uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
@@ -526,28 +527,30 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 	/* Start Iteration */
 	while (continueItr)
 	{
+		sV = sV_new;
+
 		/*  Recursion of the multigrid method  */
-		twoGrid(&soomthNum, &sV_new, &sRho, &omega);
+		twoGrid(1.0, &soomthNum, &sV_new, &sRho, &omega);
 
 		double error = 0;
 		uint n = 0;
 
 		// Compute error
-		for (uint i = 1; i <= height - 2; i++)
+		for (uint i = 1; i <= mLength - 2; i++)
 		{
-			for (uint j = 1; j <= width - 2; j++)
+			for (uint j = 1; j <= mLength - 2; j++)
 			{
 				double oldVal = sV.getElement(i, j);
 				double newVal = sV_new.getElement(i, j);
 				if (newVal != 0)
 					if (newVal != oldVal)
 					{
-						error += abs(1 - oldVal / newVal);
+						error += abs(1 - newVal / oldVal);
 						n++;
 					}
 			}
 		}
-		//std::cout << error << " , n = " << n << std::endl;
+		// std::cout << error << " , n = " << n << std::endl;
 
 		if (n != 0) error /= n;
 
@@ -555,8 +558,6 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 		{
 			continueItr = false;
 		}
-
-		sV = sV_new;
 
 		steps++;
 	}
@@ -629,16 +630,16 @@ void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 }
 
 /*  Subroutine of recursion of the multigrid method  */
-void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
+void twoGrid(double stepSize, uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 {
 	// Length of current square matrix (fine grid) containing interior points only
 	size_t inLength = u1->getRowsNum() - 2;
 
-	// State when one interior point left (+ two outliers)
+	// State when only one interior point left (+ two outliers)
 	if (inLength == 1)
 	{
 		u1->setElement(1, 1, 0.25 * (u1->getElement(0, 1) + u1->getElement(2, 1)
-			+ u1->getElement(1, 0) + u1->getElement(1, 2) - r1->getElement(1, 1) ) );
+			+ u1->getElement(1, 0) + u1->getElement(1, 2) - stepSize * stepSize * r1->getElement(1, 1)));
 		return; // Going back to call function
 	}
 
@@ -651,9 +652,9 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 	{
 		for (uint j = 1; j <= inLength; j++) // Interior points only
 		{
-			fineGrid.setElement(i, j, u1->getElement(i + 1, j) + u1->getElement(i - 1, j)
+			fineGrid.setElement(i, j, (u1->getElement(i + 1, j) + u1->getElement(i - 1, j)
 				+ u1->getElement(i, j + 1) + u1->getElement(i, j - 1) 
-				- 4 * u1->getElement(i, j) - r1->getElement(i, j));
+				- 4 * u1->getElement(i, j)) / (stepSize * stepSize) - r1->getElement(i, j));
 		}
 	}
 
@@ -680,7 +681,7 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 	// ---------------------------------- Going in -----------------------------------
 
 	// Recursion
-	twoGrid(smoothN, &correction, &coarseGrid, omega);
+	twoGrid(2 * stepSize, smoothN, &correction, &coarseGrid, omega);
 
 	// ---------------------------------- Going out ----------------------------------
 
@@ -700,7 +701,7 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 	}
 
 	// Correct u1
-	*u1 = fineGrid;
+	(*u1) += fineGrid;
 
 	// Post-smoothing using SOR method
 	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1); }
@@ -713,14 +714,14 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 void test()
 {
 	// Test Poisson equation solver on 02/04/2016
-	double accuracy = 0.001;
-	uint smoothNumber = 5;
-	uint L = 50;
-	uint H = 50;
+	double accuracy = 0.0000001;
+	uint smoothNumber = 10;
+	uint L = 100;
+	uint H = 100;
 
 	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
 	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
-	rho->setElement(26, 26, 10.0);
+	rho->setElement(51, 51, 10.0);
 
 	/*for (uint i = 0; i < H; i++)
 		for (uint j = 0; j < L; j++)
@@ -731,12 +732,12 @@ void test()
 
 	writeMatrix(&resMat, "modifedMap.txt");
 
-	resMat.display();
+	MMatrix resMat2 = IntgralSolver2(V, rho, accuracy, smoothNumber);
+
+	writeMatrix(&resMat2, "modifedMap2.txt");
 
 	delete V;
 	delete rho;
-
-	int aaaa = 0;
 }
 //void test()
 //{
@@ -805,104 +806,104 @@ void test()
 ///////////////////////////////////////////////////////////////////////////////
 /* Solving Poisson equation: \triangledown^2 V = \rho */
 /* Abandoned on 02/02/2016 */
-//MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy)
-//{
-//	size_t height = V1->getRowsNum();
-//	size_t width = V1->getColsNum();
-//
-//	MMatrix V1_new = *V1; // Updated matrix
-//
-//	clock_t t0 = clock(); // Initial time of the solver
-//
-//	int steps = 0; //  count iteration steps
-//	double omega = 2 / (1 + M_PI / sqrt(height*width)); // For SOR method only
-//	bool continueItr = true; // whether the iteration continues
-//
-//	std::cout << "Solving Equation ..." << std::endl;
-//
-//	while (continueItr)
-//	{
-//		/* Gauss-Seidel method */
-//		/*V1_new = *V1;
-//		Gauss_Seidel(1.0, &V1_new, rho1);*/
-//
-//		/* Successive Over Relaxation (SOR) method */
-//		for (uint i = 1; i <= height - 2; i++)
-//		{
-//			for (uint j = 1; j <= width - 2; j++)
-//			{
-//				if ((i + j) % 2 == 0) // Update even sites
-//				{
-//					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-//						+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-//						+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-//						- rho1->getElement(i, j)));
-//					//std::cout << (1 - omega) << " * " << V1->getElement(i, j) << " + " 
-//					//	<< omega * 0.25
-//					//	<< "* ( "
-//					//	<< V1->getElement(i - 1, j) << " + "
-//					//	<< V1->getElement(i + 1, j) << " + "
-//					//	<< V1->getElement(i, j - 1) << " + "
-//					//	<< V1->getElement(i, j + 1) << " - "
-//					//	<< rho1->getElement(i, j) << " ) = "
-//					//	<< (1 - omega) * V1->getElement(i, j)
-//					//	+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-//					//	+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-//					//	- rho1->getElement(i, j))
-//					//	<< std::endl;
-//					//std::cout << " " << V1->getElement(i, j) << std::endl;
-//				}
-//			}
-//		}
-//
-//		for (uint i = 1; i <= height - 2; i++)
-//		{
-//			for (uint j = 1; j <= width - 2; j++)
-//			{
-//				if ((i + j) % 2 != 0) // Update odd sites
-//					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-//					+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
-//					+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
-//					- rho1->getElement(i, j)));
-//			}
-//		}
-//
-//		double error = 0;
-//		int n = 0;
-//
-//		// Compute error
-//		for (int i = 1; i <= height - 2; i++)
-//		{
-//			for (int j = 1; j <= width - 2; j++)
-//			{
-//				double oldVal = V1->getElement(i, j);
-//				double newVal = V1_new.getElement(i, j);
-//				if (newVal != 0)
-//					if (newVal != oldVal)
-//					{
-//						error += abs(1 - oldVal / newVal);
-//						n++;
-//					}
-//			}
-//		}
-//		//std::cout << error << " , n = " << n << std::endl;
-//
-//		if (n != 0) error /= n;
-//
-//		if (error < accuracy)
-//		{
-//			continueItr = false;
-//		}
-//		else
-//		{
-//			*V1 = V1_new;
-//		}
-//
-//		steps++;
-//	}
-//
-//	std::cout << "Number of steps = " << steps << std::endl;
-//	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
-//
-//	return V1_new;
-//}
+MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNum)
+{
+	size_t height = V1->getRowsNum();
+	size_t width = V1->getColsNum();
+
+	MMatrix V1_new = *V1; // Updated matrix
+
+	clock_t t0 = clock(); // Initial time of the solver
+
+	int steps = 0; //  count iteration steps
+	double omega = 2 / (1 + M_PI / sqrt(height*width)); // For SOR method only
+	bool continueItr = true; // whether the iteration continues
+
+	std::cout << "Solving Equation ..." << std::endl;
+
+	while (continueItr)
+	{
+		/* Gauss-Seidel method */
+		/*V1_new = *V1;
+		Gauss_Seidel(1.0, &V1_new, rho1);*/
+
+		/* Successive Over Relaxation (SOR) method */
+		for (uint i = 1; i <= height - 2; i++)
+		{
+			for (uint j = 1; j <= width - 2; j++)
+			{
+				if ((i + j) % 2 == 0) // Update even sites
+				{
+					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+						+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+						+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+						- rho1->getElement(i, j)));
+					//std::cout << (1 - omega) << " * " << V1->getElement(i, j) << " + " 
+					//	<< omega * 0.25
+					//	<< "* ( "
+					//	<< V1->getElement(i - 1, j) << " + "
+					//	<< V1->getElement(i + 1, j) << " + "
+					//	<< V1->getElement(i, j - 1) << " + "
+					//	<< V1->getElement(i, j + 1) << " - "
+					//	<< rho1->getElement(i, j) << " ) = "
+					//	<< (1 - omega) * V1->getElement(i, j)
+					//	+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
+					//	+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
+					//	- rho1->getElement(i, j))
+					//	<< std::endl;
+					//std::cout << " " << V1->getElement(i, j) << std::endl;
+				}
+			}
+		}
+
+		for (uint i = 1; i <= height - 2; i++)
+		{
+			for (uint j = 1; j <= width - 2; j++)
+			{
+				if ((i + j) % 2 != 0) // Update odd sites
+					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
+					+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
+					+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
+					- rho1->getElement(i, j)));
+			}
+		}
+
+		double error = 0;
+		int n = 0;
+
+		// Compute error
+		for (int i = 1; i <= height - 2; i++)
+		{
+			for (int j = 1; j <= width - 2; j++)
+			{
+				double oldVal = V1->getElement(i, j);
+				double newVal = V1_new.getElement(i, j);
+				if (newVal != 0)
+					if (newVal != oldVal)
+					{
+						error += abs(1 - oldVal / newVal);
+						n++;
+					}
+			}
+		}
+		//std::cout << error << " , n = " << n << std::endl;
+
+		if (n != 0) error /= n;
+
+		if (error < accuracy)
+		{
+			continueItr = false;
+		}
+		else
+		{
+			*V1 = V1_new;
+		}
+
+		steps++;
+	}
+
+	std::cout << "Number of steps = " << steps << std::endl;
+	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
+
+	return V1_new;
+}
