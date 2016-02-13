@@ -48,16 +48,16 @@ MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthN
 void Gauss_Seidel(MMatrix* u1, MMatrix* r1);
 
 /* Successive Over Relaxation (SOR) method */
-void SOR(double* omega, MMatrix* u1_new, MMatrix* r1);
+void SOR(double* omega, MMatrix* u1_new, MMatrix* r1, double h);
 
 /*  Subroutine of recursion of the multigrid method  */
-void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega);
+void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega, double h);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
 
-double breakT = 20.0; // Maximum runing time (sec)
+double breakT = 30.0; // Maximum runing time (sec)
 
 MVector err1(2); // Recording conversion errors (Debug only)
 MVector err2(2); // Recording conversion errors (Debug only)
@@ -87,7 +87,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
 	double accuracy = 0.001; // (0.00001) Accuracy of integration approximation
 
-	uint smoothNumber = 2; // Number of smoothing before and after each multigrid recursion
+	uint smoothNumber = 5; // Number of smoothing before and after each multigrid recursion
 
 	// Select Kernel for matrix differeniation
 
@@ -134,6 +134,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	MMatrix divGy = filter(&diffY, ~bkdKer);
 
 	MMatrix divG = divGx + divGy;
+	divG.mul(-1.0); // -rho
 	//divG.display();
 
 	MMatrix initMat = *depthMat;
@@ -146,6 +147,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 
 	/*initMat = *depthMat;
 	divG = divGx + divGy;*/
+	/*divG.mul(-1.0);*/
 
 	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
 	writeMatrix(&retMat, "modifedMap.txt");
@@ -507,14 +509,14 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 	mLength = powTwo + 2;
 	std::cout << "mLength = " << mLength << std::endl;
 
-	MMatrix sV(mLength, mLength, 0.0); // Squared
-	MMatrix sRho = sV; // Squared
+	MMatrix sV(mLength, mLength, 0.0); // Squared V matrix
+	MMatrix sRho(mLength, mLength, 0.0); // Squared rho matrix
 	// Fill the upper left part of the square matrix with the input matrix
 	for (uint i = 0; i <= height - 1; i++)
 	{
 		for (uint j = 0; j <= width - 1; j++)
 		{
-			sV.setElement(i, j, V1->getElement(i, j));
+			sV.setElement(i, j, V1->getElement(i, j)); // Squared matrix sV = V1
 			sRho.setElement(i, j, rho1->getElement(i, j));
 		}
 	}
@@ -524,7 +526,10 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 	clock_t t0 = clock(); // Initial time of the solver
 
 	int steps = 0; //  count iteration steps
-	double omega = 2 / (1 + M_PI / sqrt(height*width)); // For SOR method only
+
+	//double omega = 2 / (1 + M_PI / sqrt(height*width)); // For SOR method only
+	double omega = 1.0; // For Multigrid method method 
+
 	bool continueItr = true; // whether the iteration continues
 
 	std::cout << "Solving Equation ..." << std::endl;
@@ -537,12 +542,12 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 		sV = sV_new;
 
 		/*  Recursion of the multigrid method  */
-		twoGrid(&soomthNum, &sV_new, &sRho, &omega);
+		twoGrid(&soomthNum, &sV_new, &sRho, &omega, 1.0);
 
 		double error = 0;
 		uint n = 0;
 
-		// Compute error
+		// Compute error ( relative: (1-sV) / sV_new )
 		for (uint i = 1; i <= mLength - 2; i++)
 		{
 			for (uint j = 1; j <= mLength - 2; j++)
@@ -583,10 +588,10 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 			errRecord = error;
 		}*/
 
-		if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // Break if exceed limited time
-		{
-			continueItr = false;
-		}
+		//if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // 'Break' if exceed limited time
+		//{
+		//	continueItr = false;
+		//}
 
 		//steps++;
 		steps += ( 2 * soomthNum + log2(powTwo) );
@@ -627,7 +632,7 @@ void Gauss_Seidel(MMatrix* u1, MMatrix* r1)
 }
 
 /* Successive Over Relaxation (SOR) method */
-void SOR(double* omega, MMatrix* u1, MMatrix* r1)
+void SOR(double* omega, MMatrix* u1, MMatrix* r1, double h)
 {
 	uint height = u1->getRowsNum();
 	uint width = u1->getColsNum();
@@ -641,7 +646,7 @@ void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 				u1->setElement(i, j, (1 - *omega) * u1->getElement(i, j)
 					+ *omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
 						+ u1->getElement(i, j - 1) + u1->getElement(i, j + 1)
-						- r1->getElement(i, j)));
+						+ h * h * r1->getElement(i, j)));
 			}
 		}
 	}
@@ -650,17 +655,17 @@ void SOR(double* omega, MMatrix* u1, MMatrix* r1)
 	{
 		for (uint j = 1; j <= width - 2; j++) // Interior points only
 		{
-			if ((i + j) % 2 != 0) // Update odd sites
+			if ((i + j) % 2 == 1) // Update odd sites
 				u1->setElement(i, j, (1 - *omega) * u1->getElement(i, j)
 					+ *omega * 0.25 * (u1->getElement(i - 1, j) + u1->getElement(i + 1, j)
 						+ u1->getElement(i, j - 1) + u1->getElement(i, j + 1)
-						- r1->getElement(i, j)));
+						+ h * h * r1->getElement(i, j)));
 		}
 	}
 }
 
 /*  Subroutine of recursion of the multigrid method  */
-void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
+void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega, double h)
 {
 	// Length of current square matrix (fine grid) containing interior points only
 	uint inLength = u1->getRowsNum() - 2;
@@ -669,22 +674,22 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 	if (inLength == 1)
 	{
 		u1->setElement(1, 1, 0.25 * (u1->getElement(0, 1) + u1->getElement(2, 1)
-			+ u1->getElement(1, 0) + u1->getElement(1, 2) - r1->getElement(1, 1)));
+			+ u1->getElement(1, 0) + u1->getElement(1, 2) + h * h * r1->getElement(1, 1)));
 		return; // Going back to call function
 	}
 
 	// Pre-smoothing using SOR method
-	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1); }
+	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1, h); }
 
 	// Compute the residual (fine grid)
-	MMatrix fineGrid(inLength + 2, inLength + 2);  // Number of interior points + two outliers	
+	MMatrix fineGrid(inLength + 2, inLength + 2, 0.0);  // Number of interior points + two outliers	
 	for (uint i = 1; i <= inLength; i++) // Interior points only
 	{
 		for (uint j = 1; j <= inLength; j++) // Interior points only
 		{
 			fineGrid.setElement(i, j, (u1->getElement(i + 1, j) + u1->getElement(i - 1, j)
 				+ u1->getElement(i, j + 1) + u1->getElement(i, j - 1) 
-				- 4 * u1->getElement(i, j)) - r1->getElement(i, j));
+				- 4 * u1->getElement(i, j)) / (h * h) + r1->getElement(i, j));
 		}
 	}
 
@@ -692,7 +697,7 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 	uint coarLength = inLength / 2;
 
 	// Compute the residual (coarse grid)
-	MMatrix coarseGrid(coarLength + 2, coarLength + 2);  // Number of coarse points + two outliers	
+	MMatrix coarseGrid(coarLength + 2, coarLength + 2, 0.0);  // Number of coarse points + two outliers	
 	for (uint m = 1; m <= coarLength; m++) // Coarse points only
 	{
 		uint i = 2 * m - 1;
@@ -705,15 +710,16 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 		}
 	}
 
-	// Initialize a correction on coarse grid
+	// Initialize a correction matrix on coarse grid
 	MMatrix correction(coarLength + 2, coarLength + 2);
 
 	// ---------------------------------- Going in -----------------------------------
 
 	// Recursion
-	twoGrid(smoothN, &correction, &coarseGrid, omega);
+	twoGrid(smoothN, &correction, &coarseGrid, omega, (2 * h));
 
 	// ---------------------------------- Going out ----------------------------------
+	MMatrix fineGrid_new(inLength + 2, inLength + 2, 0.0);
 
 	// Prolongate correction (coarse) to fine grid
 	//MMatrix fineGrid(inLength + 2, inLength + 2);  	
@@ -723,18 +729,18 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega)
 		for (uint n = 1; n <= coarLength; n++) // Coarse points only
 		{
 			uint j = 2 * n - 1;
-			fineGrid.setElement(i, j, coarseGrid.getElement(m, n));
-			fineGrid.setElement(i + 1, j, coarseGrid.getElement(m, n));
-			fineGrid.setElement(i, j + 1, coarseGrid.getElement(m, n));
-			fineGrid.setElement(i + 1, j + 1, coarseGrid.getElement(m, n));
+			fineGrid_new.setElement(i, j, correction.getElement(m, n));
+			fineGrid_new.setElement(i + 1, j, correction.getElement(m, n));
+			fineGrid_new.setElement(i, j + 1, correction.getElement(m, n));
+			fineGrid_new.setElement(i + 1, j + 1, correction.getElement(m, n));
 		}
 	}
 
 	// Correct u1
-	(*u1) += fineGrid;
+	(*u1) += fineGrid_new;
 
 	// Post-smoothing using SOR method
-	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1); }
+	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1, h); }
 }
 
 
@@ -858,45 +864,7 @@ MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthN
 		Gauss_Seidel(1.0, &V1_new, rho1);*/
 
 		/* Successive Over Relaxation (SOR) method */
-		for (uint i = 1; i <= height - 2; i++)
-		{
-			for (uint j = 1; j <= width - 2; j++)
-			{
-				if ((i + j) % 2 == 0) // Update even sites
-				{
-					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-						+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-						+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-						- rho1->getElement(i, j)));
-					//std::cout << (1 - omega) << " * " << V1->getElement(i, j) << " + " 
-					//	<< omega * 0.25
-					//	<< "* ( "
-					//	<< V1->getElement(i - 1, j) << " + "
-					//	<< V1->getElement(i + 1, j) << " + "
-					//	<< V1->getElement(i, j - 1) << " + "
-					//	<< V1->getElement(i, j + 1) << " - "
-					//	<< rho1->getElement(i, j) << " ) = "
-					//	<< (1 - omega) * V1->getElement(i, j)
-					//	+ omega * 0.25 * (V1->getElement(i - 1, j) + V1->getElement(i + 1, j)
-					//	+ V1->getElement(i, j - 1) + V1->getElement(i, j + 1)
-					//	- rho1->getElement(i, j))
-					//	<< std::endl;
-					//std::cout << " " << V1->getElement(i, j) << std::endl;
-				}
-			}
-		}
-
-		for (uint i = 1; i <= height - 2; i++)
-		{
-			for (uint j = 1; j <= width - 2; j++)
-			{
-				if ((i + j) % 2 != 0) // Update odd sites
-					V1_new.setElement(i, j, (1 - omega) * V1->getElement(i, j)
-					+ omega * 0.25 * (V1_new.getElement(i - 1, j) + V1_new.getElement(i + 1, j)
-					+ V1_new.getElement(i, j - 1) + V1_new.getElement(i, j + 1)
-					- rho1->getElement(i, j)));
-			}
-		}
+		SOR(&omega, &V1_new, rho1, 1.0);
 
 		double error = 0;
 		int n = 0;
