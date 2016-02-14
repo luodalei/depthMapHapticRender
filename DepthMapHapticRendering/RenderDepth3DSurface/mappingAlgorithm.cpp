@@ -57,7 +57,7 @@ void twoGrid(uint* smthNum, MMatrix* u1, MMatrix* r1, double* omega, double h);
 // GLOBAL VARIABLE
 ///////////////////////////////////////////////////////////////////////////////
 
-double breakT = 30.0; // Maximum runing time (sec)
+double breakT = 300.0; // Maximum runing time (sec)
 
 MVector err1(2); // Recording conversion errors (Debug only)
 MVector err2(2); // Recording conversion errors (Debug only)
@@ -85,9 +85,9 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.001; // (0.00001) Accuracy of integration approximation
+	double accuracy = 0.00001; // (0.00001) Accuracy of integration approximation
 
-	uint smoothNumber = 5; // Number of smoothing before and after each multigrid recursion
+	uint smoothNumber = 7; // Number of smoothing before and after each multigrid recursion
 
 	// Select Kernel for matrix differeniation
 
@@ -134,21 +134,23 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	MMatrix divGy = filter(&diffY, ~bkdKer);
 
 	MMatrix divG = divGx + divGy;
-	divG.mul(-1.0); // -rho
+	//divG.mul(-1.0); // negative rho expected in Poisson Solver
 	//divG.display();
 
 	MMatrix initMat = *depthMat;
-	//initMat.setBlock(0.0, std::make_tuple(1, -1, 1, -1)); // Just a test
 
 	///////////////////////////////// Compare Algorithms ////////////////////////////////////
-	/*MMatrix retMat2 = IntgralSolver2(&initMat, &divG, accuracy, smoothNumber);
+	/*std::cout << "Compression threshold = " << thres << ", Compression Alpha = " << alpha << std::endl;
+	std::cout << "SOC method: " << " accuracy = " << accuracy << std::endl;
+	MMatrix retMat2 = IntgralSolver2(&initMat, &divG, accuracy, smoothNumber);
 	writeMatrix(&retMat2, "modifedMap2.txt");
 	writeMatrix(&err2, "err2.txt");*/
 
-	/*initMat = *depthMat;
-	divG = divGx + divGy;*/
-	/*divG.mul(-1.0);*/
+	initMat = *depthMat;
+	divG = divGx + divGy;
 
+	std::cout << "Multigrid method: " << ", accuracy = " << accuracy 
+		<< ", Smooth Number = " << smoothNumber  << std::endl;
 	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
 	writeMatrix(&retMat, "modifedMap.txt");
 	writeMatrix(&err1, "err1.txt");
@@ -502,24 +504,57 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 	// Wrap the matrix (V1) with a square matrix (sV) with length equal to power of 2
 	uint mLength = (height > width) ? height : width;
 	uint powTwo = 1;
+
+	double stepLen = 1.0; // Step length of poisson solver
+
 	while (powTwo + 2 < mLength) // Number of interior points + two outliers
 	{
 		powTwo *= 2;
 	}
 	mLength = powTwo + 2;
-	std::cout << "mLength = " << mLength << std::endl;
+	//std::cout << "mLength = " << mLength << std::endl;
 
 	MMatrix sV(mLength, mLength, 0.0); // Squared V matrix
 	MMatrix sRho(mLength, mLength, 0.0); // Squared rho matrix
-	// Fill the upper left part of the square matrix with the input matrix
-	for (uint i = 0; i <= height - 1; i++)
+
+	// Fill the center part of the square matrix with the input matrix
+	uint hShift = (mLength - height) / 2;
+	uint wShift = (mLength - width) / 2;
+
+	for (uint i = 0; i < height; i++)
 	{
-		for (uint j = 0; j <= width - 1; j++)
+		for (uint n = 0; n <= wShift; n++) // Fill left extra block
 		{
-			sV.setElement(i, j, V1->getElement(i, j)); // Squared matrix sV = V1
-			sRho.setElement(i, j, rho1->getElement(i, j));
+			sV.setElement(hShift + i, n, V1->getElement(i, 0));
+		}
+		for (uint n = wShift + width - 1; n < mLength; n++) // Fill right extra block
+		{
+			sV.setElement(hShift + i, n, V1->getElement(i, width - 1));
+		}
+
+	}
+
+	for (uint j = 0; j < width; j++)
+	{
+		for (uint m = 0; m <= hShift; m++) // Fill top extra block
+		{
+			sV.setElement(m, wShift + j, V1->getElement(0, j));
+		}
+		for (uint m = hShift + height - 1; m < mLength; m++) // Fill bottom extra block
+		{
+			sV.setElement(m, wShift + j, V1->getElement(height - 1, j));
 		}
 	}
+
+	// Extend rho to square matrix
+	sRho.copyBlock(*rho1, height, width, std::make_tuple(0, 0, hShift, wShift));
+
+	// Fill blocks at four corners
+	sV.setBlock(V1->getElement(0, 0), std::make_tuple(0, hShift, 0, wShift));
+	sV.setBlock(V1->getElement(height - 1, 0), std::make_tuple(hShift + height - 1, mLength - 1, 0, wShift));
+	sV.setBlock(V1->getElement(0, width - 1), std::make_tuple(0, hShift, wShift + width - 1,mLength - 1));
+	sV.setBlock(V1->getElement(height - 1, 0), std::make_tuple(hShift + height - 1, mLength - 1, 
+		wShift + width - 1, mLength - 1));
 
 	MMatrix sV_new = sV; // Update matrix
 
@@ -542,7 +577,7 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 		sV = sV_new;
 
 		/*  Recursion of the multigrid method  */
-		twoGrid(&soomthNum, &sV_new, &sRho, &omega, 1.0);
+		twoGrid(&soomthNum, &sV_new, &sRho, &omega, stepLen);
 
 		double error = 0;
 		uint n = 0;
@@ -577,38 +612,20 @@ MMatrix IntgralSolver(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthNu
 			continueItr = false;
 		}
 
-		// Prevent error increase
-		/*if (error >= errRecord)
+		if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // 'Break' if exceed limited time
 		{
-			sV_new = sV;
 			continueItr = false;
 		}
-		else
-		{
-			errRecord = error;
-		}*/
 
-		//if ( breakT <= double(clock() - t0) / CLOCKS_PER_SEC ) // 'Break' if exceed limited time
-		//{
-		//	continueItr = false;
-		//}
-
-		//steps++;
-		steps += ( 2 * soomthNum + log2(powTwo) );
+		steps += ( ( 2 * soomthNum + 1 ) * log2(powTwo) );
 	}
 
 	std::cout << "Number of steps = " << steps << std::endl;
 	std::cout << "CPU time = " << double(clock() - t0) / CLOCKS_PER_SEC << " sec" << std::endl;
 
 	// Crop the resulted square matrix to original size and discard extended parts.
-	MMatrix retMat(height, width);
-	for (uint i = 0; i <= height - 1; i++)
-	{
-		for (uint j = 0; j <= width - 1; j++)
-		{
-			retMat.setElement(i, j, sV_new.getElement(i, j));
-		}
-	}
+	MMatrix retMat(height, width, 0.0);
+	retMat.copyBlock(sV_new, height, width, std::make_tuple(hShift, wShift, 0, 0));
 
 	return retMat;
 }
@@ -747,34 +764,58 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega, double h)
 ///////////////////////////////////////////////////////////////////////////////
 // TestOnly FUNCTIONS
 ///////////////////////////////////////////////////////////////////////////////
-void test()
-{
-	// Test Poisson equation solver on 02/04/2016
-	double accuracy = 0.001;
-	uint smoothNumber = 5;
-	uint L = 500;
-	uint H = 300;
+//void test()
+//{
+//	uint L = 540;
+//	uint H = 960;
+//	double accuracy = 0.001;
+//	uint smoothNumber = 5;
+//
+//	MMatrix V(H , L , 0.0);
+//
+//	V.setBlock(3.0, std::make_tuple(0, 29, 0, 19));
+//	V.setBlock(1.0, std::make_tuple(30, 929, 0, 19));
+//	V.setBlock(3.0, std::make_tuple(930, 959, 0, 19));
+//	V.setBlock(1.0, std::make_tuple(0, 29, 20, 519));
+//	V.setBlock(2.0, std::make_tuple(30, 929, 20, 519));
+//	V.setBlock(1.0, std::make_tuple(930, 959, 20, 519));
+//	V.setBlock(3.0, std::make_tuple(0, 29, 520, 539));
+//	V.setBlock(1.0, std::make_tuple(30, 929, 520, 539));
+//	V.setBlock(3.0, std::make_tuple(930, 959, 520, 539));
+//
+//	V = ~V;
+//
+//	MMatrix retMat = IntgralSolver(&V, &V, accuracy, smoothNumber);
+//}
 
-	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
-	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
-
-	//rho->setElement(51, 51, 10.0);
-	for (uint i = 0; i < H+2; i++)
-		for (uint j = 0; j < L+2; j++)
-			rho->setElement(i, j, rand()%10+1);
-	//rho->display();
-
-	MMatrix resMat2 = IntgralSolver2(V, rho, accuracy, smoothNumber);
-	writeMatrix(&resMat2, "modifedMap2.txt");
-	writeMatrix(&err2, "err2.txt");
-
-	MMatrix resMat = IntgralSolver(V, rho, accuracy, smoothNumber);
-	writeMatrix(&resMat, "modifedMap.txt");	
-	writeMatrix(&err1, "err1.txt");
-
-	delete V;
-	delete rho;
-}
+//void test()
+//{
+//	// Test Poisson equation solver on 02/04/2016
+//	double accuracy = 0.001;
+//	uint smoothNumber = 5;
+//	uint L = 500;
+//	uint H = 300;
+//
+//	MMatrix* V = new MMatrix(H + 2 , L + 2, 0.0);
+//	MMatrix* rho = new MMatrix(H + 2, L + 2, 0.0);
+//
+//	//rho->setElement(51, 51, 10.0);
+//	for (uint i = 0; i < H+2; i++)
+//		for (uint j = 0; j < L+2; j++)
+//			rho->setElement(i, j, rand()%10+1);
+//	//rho->display();
+//
+//	MMatrix resMat2 = IntgralSolver2(V, rho, accuracy, smoothNumber);
+//	writeMatrix(&resMat2, "modifedMap2.txt");
+//	writeMatrix(&err2, "err2.txt");
+//
+//	MMatrix resMat = IntgralSolver(V, rho, accuracy, smoothNumber);
+//	writeMatrix(&resMat, "modifedMap.txt");	
+//	writeMatrix(&err1, "err1.txt");
+//
+//	delete V;
+//	delete rho;
+//}
 //void test()
 //{
 //	// Test Poisson equation solver on 01/11/2016
@@ -860,8 +901,7 @@ MMatrix IntgralSolver2(MMatrix* V1, MMatrix* rho1, double accuracy, uint soomthN
 	while (continueItr)
 	{
 		/* Gauss-Seidel method */
-		/*V1_new = *V1;
-		Gauss_Seidel(1.0, &V1_new, rho1);*/
+		/*Gauss_Seidel(1.0, &V1_new, rho1);*/
 
 		/* Successive Over Relaxation (SOR) method */
 		SOR(&omega, &V1_new, rho1, 1.0);

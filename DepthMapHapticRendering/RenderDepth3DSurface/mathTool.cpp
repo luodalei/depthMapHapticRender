@@ -256,10 +256,11 @@ void MMatrix::setElement(uint i, uint j, double val)
 }
 
 // set a block from rInit to rEnd and cInit to cEnd with a value
+// blockRange(rInit, rEnd, cInit, cEnd)
 void MMatrix::setBlock(double val, Range2D blockRange)
 {
-	int height = this->getRowsNum();
-	int width = this->getColsNum();
+	int height = this->rowsNum;
+	int width = this->colsNum;
 
 	int rInit, rEnd, cInit, cEnd;
 
@@ -318,6 +319,80 @@ void MMatrix::setBlock(double val, Range2D blockRange)
 		for (int j = cInit; j < cEnd; j++)
 		{
 			this->mMat[i][j] = val;
+		}
+	}
+}
+
+// Copy a 'height' - by - 'width' block from source matrix 'srcMat' to current matrix
+// Optional inital indeices for both source and target matrix
+// blockRange(rInit_src, cInit_src, rInit_tar, cInit_tar)
+void MMatrix::copyBlock(const MMatrix& srcMat, int height, int width,
+	Range2D blockRange)
+{
+	int rInit_src, cInit_src, rInit_tar, cInit_tar;
+
+	// Check validness of 'rInit_src'
+	if ((std::get<0>(blockRange) + height) > srcMat.rowsNum )
+	{
+		std::cerr << "Warning: 'rInit_src + height' out of matrix boundary" << std::endl;
+	}
+	else if (std::get<0>(blockRange) < 0)
+	{
+		rInit_src = 0;
+	}
+	else
+	{
+		rInit_src = std::get<0>(blockRange);
+	}
+
+	// Check validness of 'cInit_src'
+	if ((std::get<1>(blockRange) + width) > srcMat.colsNum)
+	{
+		std::cerr << "Warning: 'cInit_src + width' out of matrix boundary" << std::endl;
+	}
+	else if (std::get<1>(blockRange) < 0)
+	{
+		cInit_src = 0;
+	}
+	else
+	{
+		cInit_src = std::get<1>(blockRange);
+	}
+
+	// Check validness of 'rInit_tar'
+	if ((std::get<2>(blockRange) + height) > this->rowsNum)
+	{
+		std::cerr << "Warning: 'rInit_tar + height' out of matrix boundary" << std::endl;
+	}
+	else if (std::get<2>(blockRange) < 0)
+	{
+		rInit_tar = 0;
+	}
+	else
+	{
+		rInit_tar = std::get<2>(blockRange);
+	}
+
+	// Check validness of 'cInit_tar'
+	if ((std::get<3>(blockRange) + width) > this->colsNum)
+	{
+		std::cerr << "Warning: 'cInit_tar + width' out of matrix boundary" << std::endl;
+	}
+	else if (std::get<3>(blockRange) < 0)
+	{
+		cInit_tar = 0;
+	}
+	else
+	{
+		cInit_tar = std::get<3>(blockRange);
+	}
+
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			this->mMat[rInit_tar + i][cInit_tar + j] 
+		 = srcMat.mMat[rInit_src + i][cInit_src + j];
 		}
 	}
 }

@@ -1,19 +1,6 @@
-﻿Build started 2/13/2016 2:39:25 PM.
-     1>Project "D:\Yitian\OneDrive\DepthMRender\chai3d\DepthMapHapticRendering\RenderDepth3DSurface\application-VS2013.vcxproj" on node 2 (Build target(s)).
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(357,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(381,5): warning MSB8028: The intermediate directory (obj/Debug/Win32\) contains files shared from another project (application.vcxproj, depthMHaptics.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../../src /I../../external/Eigen /I../../external/glew/include /I../../extras/freeglut/include /I../../external/libpng/include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _MSVC /D _CRT_SECURE_NO_WARNINGS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"obj/Debug/Win32\\" /Fd"obj/Debug/Win32\vc120.pdb" /Gd /TP /wd4244 /wd4305 /analyze- /errorReport:prompt /MP mappingAlgorithm.cpp
-         mappingAlgorithm.cpp
-     1>mappingAlgorithm.cpp(873): warning C4018: '<=' : signed/unsigned mismatch
-     1>mappingAlgorithm.cpp(875): warning C4018: '<=' : signed/unsigned mismatch
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\bin\renderDepthArray.exe" /INCREMENTAL /NOLOGO /LIBPATH:../../lib/Debug/Win32 /LIBPATH:../../extras/freeglut/lib/Debug/Win32 freeglut.lib chai3d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Yitian\OneDrive\DepthMRender\chai3d\DepthMapHapticRendering\bin\renderDepthArray.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\bin\renderDepthArray.lib" /MACHINE:X86 /SAFESEH obj/Debug/Win32\main_cMultiMesh.obj
-         obj/Debug/Win32\mappingAlgorithm.obj
-         obj/Debug/Win32\mathTool.obj
-         application-VS2013.vcxproj -> D:\Yitian\OneDrive\DepthMRender\chai3d\DepthMapHapticRendering\RenderDepth3DSurface\..\bin\renderDepthArray.exe
-     1>Done Building Project "D:\Yitian\OneDrive\DepthMRender\chai3d\DepthMapHapticRendering\RenderDepth3DSurface\application-VS2013.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:00.51
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(357,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(381,5): warning MSB8028: The intermediate directory (obj/Debug/Win32\) contains files shared from another project (application.vcxproj, depthMHaptics.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  mappingAlgorithm.cpp
+mappingAlgorithm.cpp(913): warning C4018: '<=' : signed/unsigned mismatch
+mappingAlgorithm.cpp(915): warning C4018: '<=' : signed/unsigned mismatch
+  application-VS2013.vcxproj -> D:\Yitian\OneDrive\DepthMRender\chai3d\DepthMapHapticRendering\RenderDepth3DSurface\..\bin\renderDepthArray.exe

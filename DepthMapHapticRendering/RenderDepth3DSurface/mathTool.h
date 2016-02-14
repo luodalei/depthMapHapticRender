@@ -68,7 +68,14 @@ class MMatrix
 	void setElement(uint i, uint j, double val);
 
 	// set a block from rInit to rEnd and cInit to cEnd with a value
+	// blockRange(rInit, rEnd, cInit, cEnd)
 	void setBlock(double val, Range2D blockRange = std::make_tuple(0, 0, 0, 0));
+
+	// Copy a 'height' - by - 'width' block from source matrix 'srcMat' to current matrix
+	// Optional inital indeices for both source and target matrix
+	// blockRange(rInit_src, cInit_src, rInit_tar, cInit_tar)
+	void copyBlock(const MMatrix& srcMat, int rLen, int cLen,
+		Range2D blockRange = std::make_tuple(0, 0, 0, 0));
 
 	// get value of element at i, j
 	double getElement(uint i, uint j);
