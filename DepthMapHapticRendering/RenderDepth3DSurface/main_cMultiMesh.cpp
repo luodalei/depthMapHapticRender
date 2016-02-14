@@ -223,10 +223,10 @@ int main(int argc, char* argv[])
 	// Apply algorithm to the depth map
 	///////////////////////////////////////////////////////////////////////////
 
-	// 1. Gaussian filtering (result in marginal attenuation)
-	uint radius = 2; // (5) changed 01 / 15 / 2016
-	int sigma = 4; // (4)
-	mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
+	// 1. Gaussian filtering (Optional)
+	//uint radius = 2; // (5) changed 01 / 15 / 2016
+	//int sigma = 4; // (4)
+	//mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. Gradient magnitude compression and bas relief
 	uint radius2 = 2; // (2)

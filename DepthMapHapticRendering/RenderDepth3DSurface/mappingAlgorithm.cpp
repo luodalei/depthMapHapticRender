@@ -88,7 +88,7 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.005; // (0.001) Accuracy of integration approximation
+	double accuracy = 0.008; // (0.001) Accuracy of integration approximation
 
 	uint smoothNumber = 8; // Number of smoothing before and after each multigrid recursion
 
@@ -133,6 +133,8 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	//divG.mul(-1.0); // negative rho expected in Poisson Solver
 	//divG.display();
 
+	divG = gaussian(0.5, &divG, 1, 1); // Gaussian filter
+
 	MMatrix initMat = *depthMat;
 
 	///////////////////////////////// Compare Algorithms ////////////////////////////////////
@@ -149,9 +151,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
 	writeMatrix(&retMat, "modifedMap.txt");
 	writeMatrix(&err1, "err1.txt");
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
-	//MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
+	/////////////////////////////////////////////////////////////////////////////////////////	
 
 	// Calculate error
 	double error = 0.0;
@@ -734,25 +734,23 @@ void twoGrid(uint* smoothN, MMatrix* u1, MMatrix* r1, double* omega, double h)
 	twoGrid(smoothN, &correction, &coarseGrid, omega, (2 * h));
 
 	// ---------------------------------- Going out ----------------------------------
-	MMatrix fineGrid_new(inLength + 2, inLength + 2, 0.0);
 
-	// Prolongate correction (coarse) to fine grid
-	//MMatrix fineGrid(inLength + 2, inLength + 2);  	
+	// Prolongate correction (coarse) to fine grid 	
 	for (uint m = 1; m <= coarLength; m++) // Coarse points only
 	{
 		uint i = 2 * m - 1;
 		for (uint n = 1; n <= coarLength; n++) // Coarse points only
 		{
 			uint j = 2 * n - 1;
-			fineGrid_new.setElement(i, j, correction.getElement(m, n));
-			fineGrid_new.setElement(i + 1, j, correction.getElement(m, n));
-			fineGrid_new.setElement(i, j + 1, correction.getElement(m, n));
-			fineGrid_new.setElement(i + 1, j + 1, correction.getElement(m, n));
+			fineGrid.setElement(i, j, correction.getElement(m, n));
+			fineGrid.setElement(i + 1, j, correction.getElement(m, n));
+			fineGrid.setElement(i, j + 1, correction.getElement(m, n));
+			fineGrid.setElement(i + 1, j + 1, correction.getElement(m, n));
 		}
 	}
 
 	// Correct u1
-	(*u1) += fineGrid_new;
+	(*u1) += fineGrid;
 
 	// Post-smoothing using SOR method
 	for (uint i = 0; i < *smoothN; i++) { SOR(omega, u1, r1, h); }
