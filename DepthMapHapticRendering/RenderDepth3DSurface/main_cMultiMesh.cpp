@@ -224,13 +224,13 @@ int main(int argc, char* argv[])
 	///////////////////////////////////////////////////////////////////////////
 
 	// 1. Gaussian filtering (result in marginal attenuation)
-	//uint radius = 2; // (5) changed 01 / 15 / 2016
-	//int sigma = 4; // (4)
-	//mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
+	uint radius = 2; // (5) changed 01 / 15 / 2016
+	int sigma = 4; // (4)
+	mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
 	// 2. Gradient magnitude compression and bas relief
 	uint radius2 = 2; // (2)
-	double thresh = 0.008; // (0.01)
+	double thresh = 0.01; // (0.01)
 	double alpha = 2.0; // (5.0)
 
 	mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);

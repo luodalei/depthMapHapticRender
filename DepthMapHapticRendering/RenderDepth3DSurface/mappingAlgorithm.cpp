@@ -26,7 +26,10 @@ instead.
 ///////////////////////////////////////////////////////////////////////////////
 
 /* 2D Filter */
-MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange = std::make_tuple(0, 0, 0, 0));
+// Optional inputs:
+// Select the filtering range
+// Fix the unbalanced margin, positive input matrix required
+MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange = std::make_tuple(0, 0, 0, 0), bool marginFix = false);
 
 /* Construct gaussian filter kernel block */
 MMatrix gaussianKernel(uint radius, int sigma);
@@ -72,7 +75,7 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 	MMatrix kernel = gaussianKernel(radius, sigma);
 
-	MMatrix retMat = filter(depthMat, kernel);
+	MMatrix retMat = filter(depthMat, kernel, std::make_tuple(0, 0, 0, 0), true);
 
 	return retMat;
 }
@@ -85,9 +88,9 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.00001; // (0.00001) Accuracy of integration approximation
+	double accuracy = 0.005; // (0.001) Accuracy of integration approximation
 
-	uint smoothNumber = 7; // Number of smoothing before and after each multigrid recursion
+	uint smoothNumber = 8; // Number of smoothing before and after each multigrid recursion
 
 	// Select Kernel for matrix differeniation
 
@@ -110,13 +113,6 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	MMatrix diffMag(0, 0);
 
 	std::tie(diffX, diffY, diffMag) = matrixDiff(depthMat, fwdKer, true);
-
-	//diffX = filter(depthMat, fwdKer, std::make_tuple(0, 0, 0, -1));
-	////diffX.display();
-	//diffY = filter(depthMat, ~fwdKer, std::make_tuple(0, -1, 0, 0));
-	////diffY.display();
-	//diffMag = diffX.times(diffX) + diffY.times(diffY);
-	//diffMag.sqroot(); // $sqrt{ x^2 + y^2 }$
 
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
 	compressed(&diffMag, thres, alpha);
@@ -144,10 +140,9 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	std::cout << "SOC method: " << " accuracy = " << accuracy << std::endl;
 	MMatrix retMat2 = IntgralSolver2(&initMat, &divG, accuracy, smoothNumber);
 	writeMatrix(&retMat2, "modifedMap2.txt");
-	writeMatrix(&err2, "err2.txt");*/
-
+	writeMatrix(&err2, "err2.txt");
 	initMat = *depthMat;
-	divG = divGx + divGy;
+	divG = divGx + divGy;*/
 
 	std::cout << "Multigrid method: " << ", accuracy = " << accuracy 
 		<< ", Smooth Number = " << smoothNumber  << std::endl;
@@ -253,7 +248,7 @@ void writeMatrix(MMatrix* mat, std::string filename)
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Apply filter to input data matrix */
-MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
+MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange, bool marginFix)
 {
 	int height = mat->getRowsNum();
 	int width = mat->getColsNum();
@@ -331,17 +326,20 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 	int radius;
 	int mod; // Modify the range of kernel for odd or even sites
 
-	//double deftWeightSum = 0; // default sum of kernel weight (REMOVED)
+	double deftWeightSum = 0; // default sum of kernel weight (Optional)
 
 	MMatrix mappedMat = *mat;
 
-	/*for (uint p = 0; p < kerLen; p++)
+	if (marginFix)
 	{
-		for (uint q = 0; q < kerLen; q++)
+		for (uint p = 0; p < kerLen; p++)
 		{
-			deftWeightSum += (ker.getElement(p, q));
-		}
-	}*/ // (REMOVED)
+			for (uint q = 0; q < kerLen; q++)
+			{
+				deftWeightSum += (ker.getElement(p, q));
+			}
+		} // (Optional)
+	}
 
 	if (kerLen % 2 == 1) // If kernel side length is odd
 	{
@@ -363,7 +361,7 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 			int mEnd = radius + mod;
 			int nInit = -radius;
 			int nEnd = radius + mod;
-			//double weightSum = 0; // current sum of kernel weight  (REMOVED)
+			double weightSum = 0; // current sum of kernel weight  (Optional)
 
 			// if filter block exceed image boundary then truncate filter block
 			if (i < radius){ mInit = -i; }
@@ -379,16 +377,16 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange)
 				{
 					// convolution
 					filtSum += mat->getElement(i + m, j + n) * ker.getElement(m + radius, n + radius);
-					//weightSum += (ker.getElement(m + radius, n + radius));
+					weightSum += (ker.getElement(m + radius, n + radius));
 				}
 			}
 
-			//if ((weightSum < deftWeightSum) && (weightSum != 0)) //  (REMOVED)
-			//{
-			//	// In case of kernel block being truncated
-			//	mappedMat.setElement(i, j, (filtSum * deftWeightSum / weightSum));
-			//}
-			//else // (REMOVED on 01/15/2016 due to \pm issues)
+			if (marginFix && (weightSum < deftWeightSum) && (weightSum != 0)) //  (Optional)
+			{
+				// In case of kernel block being truncated
+				mappedMat.setElement(i, j, (filtSum * deftWeightSum / weightSum));
+			}
+			else // (Made optional on 02/14/2016 : pm issues)
 			//{
 				mappedMat.setElement(i, j, filtSum);
 			//}
