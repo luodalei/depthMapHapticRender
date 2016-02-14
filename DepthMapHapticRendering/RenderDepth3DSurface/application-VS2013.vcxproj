@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main_cMultiMesh.cpp" />
+    <ClCompile Include="hapticRendering.cpp" />
+    <ClCompile Include="main_DepthMapHR.cpp" />
     <ClCompile Include="mappingAlgorithm.cpp" />
     <ClCompile Include="mathTool.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="hapticRendering.h" />
     <ClInclude Include="mappingAlgorithm.h" />
     <ClInclude Include="mathTool.h" />
   </ItemGroup>
