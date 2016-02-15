@@ -14,7 +14,9 @@ Mathmatical Tool
 #include "mathTool.h"
 //------------------------------------------------------------------------------
 
-#include <iostream>
+#include <iostream> 
+#include <fstream> 
+#include <string>
 #include <vector>
 
 //------------------------------------------------------------------------------
@@ -983,4 +985,53 @@ MVector pascalTriangle(size_t winSize, double initVal1, double initVal2)
 		}
 	}
 	return retMat;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ASSISTIVE FUNCTIONS
+///////////////////////////////////////////////////////////////////////////////
+
+/* Import the original depth map image */
+void readMatrix(MMatrix* mat, std::string filepath)
+{
+	std::ifstream inFile;
+	std::string str;
+
+	uint height = mat->getRowsNum();
+	uint width = mat->getColsNum();
+
+	inFile.open(filepath);
+	for (uint i = 0; i < height; i++)
+	{
+		for (uint j = 0; j < width; j++)
+		{
+			getline(inFile, str, ' ');
+			mat->setElement(i, j, stof(str));
+		}
+	}
+	inFile.close();
+}
+
+/* Export the mapped image to a .txt file */
+void writeMatrix(MMatrix* mat, std::string filename)
+{
+	uint height = mat->getRowsNum();
+	uint width = mat->getColsNum();
+
+	std::ofstream outFile;
+	outFile.open(filename);
+
+	// Write in ".csv" format
+	for (uint i = 0; i < height; i++)
+	{
+		for (uint j = 0; j < width; j++)
+		{
+			if (j > 0) outFile << ",";
+			outFile << mat->getElement(i, j);
+			//outFile << mat->getElement(i, j) << ", ";
+		}
+
+		outFile << "\n";
+	}
+	outFile.close();
 }

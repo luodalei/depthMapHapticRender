@@ -23,11 +23,13 @@
     <ClCompile Include="main_DepthMapHR.cpp" />
     <ClCompile Include="mappingAlgorithm.cpp" />
     <ClCompile Include="mathTool.cpp" />
+    <ClCompile Include="poissonSolver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hapticRendering.h" />
     <ClInclude Include="mappingAlgorithm.h" />
     <ClInclude Include="mathTool.h" />
+    <ClInclude Include="poissonSolver.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>renderDepthArray</ProjectName>

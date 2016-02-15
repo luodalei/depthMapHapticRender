@@ -22,6 +22,9 @@
     <ClCompile Include="main_DepthMapHR.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="poissonSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mappingAlgorithm.h">
@@ -31,6 +34,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hapticRendering.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="poissonSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

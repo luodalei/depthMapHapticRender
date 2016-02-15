@@ -2,13 +2,18 @@
 /*
 \author    Yitian Shao
 \created 11/20/2015
+\updated 02/15/2015
 
 All the tone-mapping algorithms (as functions) are included in this file.
 */
 //==============================================================================
 
+#pragma once // Ensure unique inclusion
+
+//------------------------------------------------------------------------------
 #include <string>
-#include "mathTool.h"
+#include "poissonSolver.h" 
+#include "mathTool.h" 
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -25,11 +30,6 @@ All the tone-mapping algorithms (as functions) are included in this file.
 #  define IMAGE_HEIGHT 540
 #endif
 
-// Pi
-#ifndef M_PI
-#  define M_PI 3.1415926535897
-#endif
-
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
 //------------------------------------------------------------------------------
@@ -42,15 +42,6 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha);
 
 // Edge detection (matrix differentiation)
 M3MatPtr matrixDiff(MMatrix* depthMat, MMatrix ker, bool isDirect);
-
-//------------------------------------------------------------------------------
-// ASSISTIVE FUNCTIONS
-//------------------------------------------------------------------------------
-/* Import the original depth map image */
-void readMatrix(MMatrix* mat, std::string filepath);
-
-/* Export the mapped image to a .txt file */
-void writeMatrix(MMatrix* mat, std::string filename);
 
 //------------------------------------------------------------------------------
 // FOR TEST ONLY

@@ -15,12 +15,14 @@
 	This is the third step on realizing depth map haptic rendering.
 	Bas-relief using gradient compression and Multigrid method succeed.
 	Image processing and haptic rendering programs are separated.
+
+	As of 02/14/2016, no more change will be applied to this file.
+	Unless 3D and haptic rendering mechanism need to be modified.
 */
 //==============================================================================
 
 //------------------------------------------------------------------------------
-#include "chai3d.h"
-#include "mappingAlgorithm.h" // Header file for algorithm
+#include "hapticRendering.h"
 
 #include <iostream> // For test only
 #include <fstream> // For test only
@@ -636,9 +638,12 @@ double getDepthRange(MMatrix* depthMat)
 	double minVal = 0.0;
 	double maxVal = 0.0;
 
-	for (int i = 0; i < IMAGE_HEIGHT; i++)
+	size_t height = depthMat->getRowsNum();
+	size_t width = depthMat->getColsNum();
+
+	for (uint i = 0; i < height; i++)
 	{
-		for (int j = 0; j < IMAGE_WIDTH; j++)
+		for (uint j = 0; j < width; j++)
 		{
 			if (depthMat->getElement(i, j) < minVal) minVal = depthMat->getElement(i, j);
 			if (depthMat->getElement(i, j) > maxVal) maxVal = depthMat->getElement(i, j);

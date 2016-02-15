@@ -14,6 +14,8 @@ Mathmatical Tool
 */
 //==============================================================================
 
+#pragma once // Ensure unique inclusion
+
 #include <iostream>
 #include <tuple>
 #include <vector>
@@ -24,7 +26,18 @@ typedef unsigned int uint; // unsigned integer
 typedef std::vector<double> dbvector; // vector of double type
 typedef std::vector<double>::iterator dbiterator; // iterator of double type;
 typedef std::vector< std::vector< double > > dbmatrix; // matrix of double type
-typedef std::tuple<int, int, int, int> Range2D; // Store range of rows and columns of a matrix												   
+typedef std::tuple<int, int, int, int> Range2D; // Store range of rows and columns of a matrix
+
+//------------------------------------------------------------------------------
+// MARCO
+//------------------------------------------------------------------------------
+
+// Pi
+#ifndef M_PI
+#  define M_PI 3.1415926535897
+#endif
+
+//------------------------------------------------------------------------------
 													   
 ///////////////////////////////////////////////////////////////////////////////
 // Matrix class
@@ -213,3 +226,13 @@ MVector pascalTriangle(size_t winSize, double initVal1, double initVal2);
 
 // Special class type defination
 typedef std::tuple<MMatrix, MMatrix, MMatrix> M3MatPtr; // 3 MMatrix tuple
+
+//------------------------------------------------------------------------------
+// ASSISTIVE FUNCTIONS
+//------------------------------------------------------------------------------
+
+/* Import the original depth map image */
+void readMatrix(MMatrix* mat, std::string filepath);
+
+/* Export the mapped image to a .txt file */
+void writeMatrix(MMatrix* mat, std::string filename);
