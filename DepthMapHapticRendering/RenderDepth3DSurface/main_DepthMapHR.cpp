@@ -41,10 +41,10 @@ int main(int argc, char* argv[])
 	std::string imagePath5 = "../bin/resources/image/ol_dm4.png"; // "garden"
 	std::string imagePath6 = "../bin/resources/image/scorpione.png"; // "scorpione"
 	//std::string imagePath7 = "../bin/resources/image/large_scene1.png"; // "large scene (1920 * 1080)"
-	//std::string imagePath7 = "../bin/resources/image/large_scene2.png"; // "large scene (1600 * 900)"	
+	std::string imagePath7 = "../bin/resources/image/large_scene2.png"; // "large scene (1600 * 900)"	
 
 	// Load the depth matrix
-	MMatrix depthMatrix = loadImage(imagePath5);
+	MMatrix depthMatrix = loadImage(imagePath6);
 
 	MMatrix mappedMatrix(depthMatrix.getRowsNum(), depthMatrix.getColsNum(), 0.0);
 
@@ -72,6 +72,9 @@ int main(int argc, char* argv[])
 	// =================== for test only
 
 	//======================================================================================================
+
+	// Read and render stored mapped matrix
+	//readMatrix(&mappedMatrix, "modifedMap.txt");
 
 	// Rendering the image in Chai3D with haptic feedback
 	hapticRender(mappedMatrix, argc, argv);

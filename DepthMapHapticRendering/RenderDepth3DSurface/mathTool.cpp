@@ -992,6 +992,8 @@ MVector pascalTriangle(size_t winSize, double initVal1, double initVal2)
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Import the original depth map image */
+// Updated 02/15/2016
+// Note: the size of the data matrix is predefined!
 void readMatrix(MMatrix* mat, std::string filepath)
 {
 	std::ifstream inFile;
@@ -1003,11 +1005,13 @@ void readMatrix(MMatrix* mat, std::string filepath)
 	inFile.open(filepath);
 	for (uint i = 0; i < height; i++)
 	{
-		for (uint j = 0; j < width; j++)
+		for (uint j = 0; j < width - 1; j++)
 		{
-			getline(inFile, str, ' ');
+			getline(inFile, str, ','); // Element delimiter ','
 			mat->setElement(i, j, stof(str));
 		}
+		getline(inFile, str, '\n'); // Newline delimiter '\n'
+		mat->setElement(i, width - 1, stof(str));
 	}
 	inFile.close();
 }
@@ -1026,12 +1030,10 @@ void writeMatrix(MMatrix* mat, std::string filename)
 	{
 		for (uint j = 0; j < width; j++)
 		{
-			if (j > 0) outFile << ",";
+			if (j > 0) outFile << ","; // Element delimiter ','
 			outFile << mat->getElement(i, j);
-			//outFile << mat->getElement(i, j) << ", ";
 		}
-
-		outFile << "\n";
+		outFile << "\n"; // Newline delimiter '\n'
 	}
 	outFile.close();
 }
