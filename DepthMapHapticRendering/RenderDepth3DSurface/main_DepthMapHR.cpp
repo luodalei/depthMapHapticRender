@@ -18,7 +18,7 @@ Image processing and haptic rendering programs are separated.
 ///////////////////////////////////////////////////////////////////////////////
 
 // load image to an 2D array 
-int loadImage(std::string imgPath, uint* imgSize, MMatrix* depthMat);
+MMatrix loadImage(std::string imgPath);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLE
@@ -32,9 +32,6 @@ int main(int argc, char* argv[])
 	// DECLARED VARIABLES
 	//------------------------------------------------------------------------------
 
-	/* an matrix containing depth values */
-	MMatrix depthMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
-
 	// Importing image 
 	std::string imagePath0 = "../bin/resources/image/rabbit.png";
 	std::string imagePath1 = "../bin/resources/image/complexScene1.png";
@@ -43,12 +40,13 @@ int main(int argc, char* argv[])
 	std::string imagePath4 = "../bin/resources/image/ol_dm3.png"; // "office"
 	std::string imagePath5 = "../bin/resources/image/ol_dm4.png"; // "garden"
 	std::string imagePath6 = "../bin/resources/image/scorpione.png"; // "scorpione"
-	uint imageSize[2];
+	//std::string imagePath7 = "../bin/resources/image/large_scene1.png"; // "large scene (1920 * 1080)"
+	//std::string imagePath7 = "../bin/resources/image/large_scene2.png"; // "large scene (1600 * 900)"	
 
 	// Load the depth matrix
-	loadImage(imagePath6, imageSize, &depthMatrix);
+	MMatrix depthMatrix = loadImage(imagePath5);
 
-	MMatrix mappedMatrix(IMAGE_HEIGHT, IMAGE_WIDTH, 0.0);
+	MMatrix mappedMatrix(depthMatrix.getRowsNum(), depthMatrix.getColsNum(), 0.0);
 
 	mappedMatrix = depthMatrix; // Original (no filter) 
 	///////////////////////////////////////////////////////////////////////////
@@ -63,14 +61,14 @@ int main(int argc, char* argv[])
 	// 2. Gradient magnitude compression and bas relief
 	uint radius2 = 2; // (2)
 	double thresh = 0.01; // (0.01)
-	double alpha = 2.0; // (5.0)
+	double alpha = 2.0; // (5.0)(2.0)
 
-	mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
+	//mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
 
 	//test();
 
 	// =================== for test only : write data to .txt file (11/19/2015)
-	//writeMatrix(&mappedMatrix, "modifedMap.txt");
+	writeMatrix(&mappedMatrix, "modifedMap.txt");
 	// =================== for test only
 
 	//======================================================================================================
@@ -84,7 +82,7 @@ int main(int argc, char* argv[])
 
 //------------------------------------------------------------------------------
 
-int loadImage(std::string imgPath, uint* imgSize, MMatrix* depthMat)
+MMatrix loadImage(std::string imgPath)
 {
 	//--------------------------------------------------------------------------
 	// LOAD FILE 
@@ -109,7 +107,8 @@ int loadImage(std::string imgPath, uint* imgSize, MMatrix* depthMat)
 	if (!fileload)
 	{
 		std::cout << "Error - Image failed to load correctly." << std::endl;
-		return (-1); // Unsuccessful loading and exit
+		MMatrix errMat(1, 1, -1.0);
+		return errMat; // Unsuccessful loading and exit
 	}
 
 	//--------------------------------------------------------------------------
@@ -120,12 +119,14 @@ int loadImage(std::string imgPath, uint* imgSize, MMatrix* depthMat)
 	//int dpVal[4];
 
 	// depth map row (Height) and column (Width) length
-	imgSize[0] = depthImage->getHeight(); // map Row Num
-	imgSize[1] = depthImage->getWidth(); // map Col Num
+	size_t height = depthImage->getHeight(); // map Row Num
+	size_t width = depthImage->getWidth(); // map Col Num
 
-	for (uint i = 0; i < imgSize[0]; i++)
+	MMatrix depthMat(height, width, 0.0);
+
+	for (uint i = 0; i < height; i++)
 	{
-		for (uint j = 0; j < imgSize[1]; j++)
+		for (uint j = 0; j < width; j++)
 		{
 			isRight = depthImage->getPixelColor(j, i, depthValue);
 
@@ -136,12 +137,15 @@ int loadImage(std::string imgPath, uint* imgSize, MMatrix* depthMat)
 			}
 
 			// For gray scale image, R = G = B = GrayScale
-			depthMat->setElement(i, j, depthValue.m_color[0]); // Extract R Value as depth information
+			depthMat.setElement(i, j, depthValue.m_color[0]); // Extract R Value as depth information
 		}
 	}
 
-	depthMat->div(255.0); // Normalize the depth image to [0 , 1] scale
+	std::cout << "Image with size of " << height << " - by - " << width 
+			  << " has been loaded successfully" << std::endl;
 
-	return (0); // Successful
+	depthMat.div(255.0); // Normalize the depth image to [0 , 1] scale
+
+	return depthMat; 
 }
 

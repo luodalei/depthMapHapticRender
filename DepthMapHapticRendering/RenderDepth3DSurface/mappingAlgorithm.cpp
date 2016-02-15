@@ -100,7 +100,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	// Gradient Compression (change only the gradient magnitude)  (Step II)
 	compressed(&diffMag, thres, alpha);
 
-	//writeMatrix(&diffMag, "modifedMap2.txt");
+	writeMatrix(&diffMag, "modifedMap2.txt");
 
 	// g' = s' $\times$ v'
 	diffX *= diffMag; // gradient direction x times amplitude
@@ -132,7 +132,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	std::cout << "Multigrid method: " << ", accuracy = " << accuracy 
 		<< ", Smooth Number = " << smoothNumber  << std::endl;
 	MMatrix retMat = IntgralSolver(&initMat, &divG, accuracy, smoothNumber);
-	writeMatrix(&retMat, "modifedMap.txt");
+	//writeMatrix(&retMat, "modifedMap.txt");
 	
 	/////////////////////////////////////////////////////////////////////////////////////////	
 
@@ -153,9 +153,9 @@ M3MatPtr matrixDiff(MMatrix* depthMat, MMatrix ker, bool isDirect)
 	// gradient X direction
 	MMatrix diffX = filter(depthMat, ker);
 
-	// Display kernel
-	std::cout << "Matrix differenitation with Kernel:" << std::endl;
-	ker.display();
+	// Display kernel (Debug only)
+	/*std::cout << "Matrix differenitation with Kernel:" << std::endl;
+	ker.display();*/
 
 	// gradient Y direction
 	MMatrix diffY = filter(depthMat, (~ker));
@@ -193,7 +193,7 @@ MMatrix filter(MMatrix* mat, MMatrix ker, Range2D filtRange, bool marginFix)
 	if ((std::get<0>(filtRange) == 0) && (std::get<1>(filtRange) == 0) &&
 		(std::get<2>(filtRange) == 0) && (std::get<3>(filtRange) == 0) )
 	{
-		std::cout << "Filtering entire matrix" << std::endl;
+		//std::cout << "Filtering entire matrix" << std::endl; // (Debug only)
 		rInit = 0;
 		rEnd = height;
 		cInit = 0;
@@ -364,7 +364,7 @@ MMatrix gaussianKernel(uint radius, int sigma)
 			ker.setElement(i, j,  (floor(ker.getElement(i, j) * 1000000.0) / 1000000.0) );
 			//cout << ker[i][j] << " "; // for test only
 		}
-		std::cout << std::endl;
+		//std::cout << std::endl;
 	}
 
 	//ker.display(); // For test only
