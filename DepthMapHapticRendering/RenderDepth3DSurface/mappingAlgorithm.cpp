@@ -71,7 +71,7 @@ MMatrix gaussian(double intenSacle, MMatrix* depthMat, uint radius, int sigma)
 
 MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 {
-	double accuracy = 0.008; // (0.001) Accuracy of integration approximation
+	double accuracy = 0.008; // (0.008) Accuracy of integration approximation
 
 	uint smoothNumber = 8; // Number of smoothing before and after each multigrid recursion
 
@@ -116,7 +116,7 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	//divG.mul(-1.0); // negative rho expected in Poisson Solver
 	//divG.display();
 
-	divG = gaussian(0.5, &divG, 1, 1); // Gaussian filter
+	divG = gaussian(0.5, &divG, 2, 1); // Gaussian filter
 
 	MMatrix initMat = *depthMat;
 

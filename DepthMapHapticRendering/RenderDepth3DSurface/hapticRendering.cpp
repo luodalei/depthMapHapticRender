@@ -239,12 +239,12 @@ void hapticRender(MMatrix& renderMat, int argc, char* argv[])
 	light->setEnabled(true);
 
 	// define the direction of the light beam
-	light->setDir(-2.0, 0.0, 1.0);
+	light->setDir(-2.0, 0.0, 1.0); 
 
 	// set lighting conditions
-	light->m_ambient.set(0.1, 0.1, 0.1);
-	light->m_diffuse.set(0.5, 0.5, 0.5);
-	light->m_specular.set(1.0, 1.0, 1.0);
+	light->m_ambient.set(0.5, 0.5, 0.5); // (0.1) Increase the ambient of light (02/15/2016)
+	light->m_diffuse.set(0.8, 0.8, 0.8); // (0.5) Increase the diffuse of light (02/15/2016)
+	light->m_specular.set(0.05, 0.05, 0.05); // (1.0) Decrese the specular of light (02/15/2016)
 
 	/* Display detailed parameters of generic objects (for test only) */
 	/*cVector3d camPosi = camera->getGlobalPos();

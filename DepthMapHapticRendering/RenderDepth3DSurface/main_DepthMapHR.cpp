@@ -40,41 +40,56 @@ int main(int argc, char* argv[])
 	std::string imagePath4 = "../bin/resources/image/ol_dm3.png"; // "office"
 	std::string imagePath5 = "../bin/resources/image/ol_dm4.png"; // "garden"
 	std::string imagePath6 = "../bin/resources/image/scorpione.png"; // "scorpione"
-	//std::string imagePath7 = "../bin/resources/image/large_scene1.png"; // "large scene (1920 * 1080)"
-	std::string imagePath7 = "../bin/resources/image/large_scene2.png"; // "large scene (1600 * 900)"	
+
+	std::string imagePath7 = "../bin/resources/image/old_castle.png"; // "old castle"
+	std::string imagePath8 = "../bin/resources/image/cabin.png"; // "cabin"
+	std::string imagePath9 = "../bin/resources/image/rabbit_hole.png"; // "cabin"
+
+	// Maximum size of image able to render is 1244 - by - 700 pixels
+	//std::string imagePathMax = "../bin/resources/image/maximum_size_1244_700.png";
 
 	// Load the depth matrix
-	MMatrix depthMatrix = loadImage(imagePath6);
+	MMatrix depthMatrix = loadImage(imagePath9);
 
 	MMatrix mappedMatrix(depthMatrix.getRowsNum(), depthMatrix.getColsNum(), 0.0);
 
-	mappedMatrix = depthMatrix; // Original (no filter) 
-	///////////////////////////////////////////////////////////////////////////
-	// Apply algorithm to the depth map
-	///////////////////////////////////////////////////////////////////////////
+	if (1) // Mapping image and store it ====================================================================
+	{
+		//mappedMatrix = depthMatrix; // Original (no filter) 
+		///////////////////////////////////////////////////////////////////////////
+		// Apply algorithm to the depth map
+		///////////////////////////////////////////////////////////////////////////
 
-	// 1. Gaussian filtering (Optional)
-	//uint radius = 2; // (5) changed 01 / 15 / 2016
-	//int sigma = 4; // (4)
-	//mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
+		// 1. Gaussian filtering (Optional)
+		uint radius = 2; // (5) changed 01 / 15 / 2016
+		int sigma = 4; // (4)
+		mappedMatrix = gaussian(0.5, &depthMatrix, radius, sigma); // Gaussian filter 
 
-	// 2. Gradient magnitude compression and bas relief
-	uint radius2 = 2; // (2)
-	double thresh = 0.01; // (0.01)
-	double alpha = 2.0; // (5.0)(2.0)
+		// 2. Gradient magnitude compression and bas relief
+		uint radius2 = 2; // (2)
+		double thresh = 0.03; // (0.01)
+		double alpha = 15.0; // (5.0)(2.0)
 
-	//mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
+		mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
 
-	//test();
+		//test();
 
-	// =================== for test only : write data to .txt file (11/19/2015)
-	writeMatrix(&mappedMatrix, "modifedMap.txt");
-	// =================== for test only
+		// =================== for test only : write data to .txt file (11/19/2015)
+		writeMatrix(&mappedMatrix, "modifedMap.txt");
+		// =================== for test only
+	}
 
 	//======================================================================================================
 
-	// Read and render stored mapped matrix
-	//readMatrix(&mappedMatrix, "modifedMap.txt");
+	if (0) // Read stored image to render it ===============================================================
+	{
+		// Read and render stored mapped matrix
+		//readMatrix(&mappedMatrix, "../bin/mapped_images/museum.txt");
+		//readMatrix(&mappedMatrix, "../bin/mapped_images/maximum_size.txt");
+		readMatrix(&mappedMatrix, "modifedMap.txt");
+	}
+
+	//======================================================================================================
 
 	// Rendering the image in Chai3D with haptic feedback
 	hapticRender(mappedMatrix, argc, argv);
