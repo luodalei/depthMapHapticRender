@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 	//std::string imagePathMax = "../bin/resources/image/maximum_size_1244_700.png";
 
 	// Load the depth matrix
-	MMatrix depthMatrix = loadImage(imagePath9);
+	MMatrix depthMatrix = loadImage(imagePath8);
 
 	MMatrix mappedMatrix(depthMatrix.getRowsNum(), depthMatrix.getColsNum(), 0.0);
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 		// 2. Gradient magnitude compression and bas relief
 		uint radius2 = 2; // (2)
 		double thresh = 0.03; // (0.01)
-		double alpha = 15.0; // (5.0)(2.0)
+		double alpha = 5.0; // (5.0)
 
 		mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
 
@@ -86,7 +86,10 @@ int main(int argc, char* argv[])
 		// Read and render stored mapped matrix
 		//readMatrix(&mappedMatrix, "../bin/mapped_images/museum.txt");
 		//readMatrix(&mappedMatrix, "../bin/mapped_images/maximum_size.txt");
-		readMatrix(&mappedMatrix, "modifedMap.txt");
+
+		//readMatrix(&mappedMatrix, "../bin/mapped_images/cabin.txt");
+		//readMatrix(&mappedMatrix, "../bin/mapped_images/old_castle.txt");
+		readMatrix(&mappedMatrix, "../bin/mapped_images/rabbit_hole.txt");
 	}
 
 	//======================================================================================================

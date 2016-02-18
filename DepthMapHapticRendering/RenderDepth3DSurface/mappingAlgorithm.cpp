@@ -118,6 +118,8 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 
 	divG = gaussian(0.5, &divG, 2, 1); // Gaussian filter
 
+	divG.mul(-1.0);
+
 	MMatrix initMat = *depthMat;
 
 	///////////////////////////////// Compare Algorithms ////////////////////////////////////
