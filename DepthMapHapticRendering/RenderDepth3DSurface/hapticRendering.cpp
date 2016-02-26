@@ -280,7 +280,7 @@ void hapticRender(MMatrix& renderMat, int argc, char* argv[])
 	double hapticRadius = 0.005;
 
 	// define the radius of the tool (displayed sphere)	===========================
-	double toolRadius = 0.005;
+	double toolRadius = 0.01; // (0.005) Displayed too radius doubled 02/26/2016
 
 	// define the stiffness of the contact object =================================
 	double stiffnessScale = 0.5; // modified on 11/24/2015

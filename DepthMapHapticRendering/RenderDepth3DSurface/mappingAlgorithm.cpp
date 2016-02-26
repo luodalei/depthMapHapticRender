@@ -113,12 +113,11 @@ MMatrix basRelief(MMatrix* depthMat, uint radius, double thres, double alpha)
 	MMatrix divGy = filter(&diffY, ~bkdKer);
 
 	MMatrix divG = divGx + divGy;
-	//divG.mul(-1.0); // negative rho expected in Poisson Solver
 	//divG.display();
 
 	divG = gaussian(0.5, &divG, 2, 1); // Gaussian filter
 
-	divG.mul(-1.0);
+	divG.mul(-1.0); // negative rho expected in Poisson Solver
 
 	MMatrix initMat = *depthMat;
 

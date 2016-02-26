@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 
 		// 2. Gradient magnitude compression and bas relief
 		uint radius2 = 2; // (2)
-		double thresh = 0.03; // (0.01)
+		double thresh = 0.03; // (0.01)(0.03)
 		double alpha = 5.0; // (5.0)
 
 		mappedMatrix = basRelief(&mappedMatrix, radius2, thresh, alpha);
@@ -84,7 +84,6 @@ int main(int argc, char* argv[])
 	if (0) // Read stored image to render it ===============================================================
 	{
 		// Read and render stored mapped matrix
-		//readMatrix(&mappedMatrix, "../bin/mapped_images/museum.txt");
 		//readMatrix(&mappedMatrix, "../bin/mapped_images/maximum_size.txt");
 
 		//readMatrix(&mappedMatrix, "../bin/mapped_images/cabin.txt");
